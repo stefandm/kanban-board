@@ -6,6 +6,7 @@
   "homepage": "https://stefandm.github.io/kanban-board/",
   "scripts": {
     "predeploy": "npm run build",
+    "postbuild": "cpx \"dist/index.html\" dist/404.html",
     "deploy": "gh-pages -d dist",
     "dev": "vite",
     "build": "tsc -b && vite build",
