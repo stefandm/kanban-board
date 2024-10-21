@@ -6,7 +6,6 @@ import {
   query,
   where,
   onSnapshot,
-  // Timestamp,
   doc,
   updateDoc,
   deleteDoc,
@@ -18,8 +17,15 @@ import EditTaskModal from './EditTaskModal';
 import {
   FaEdit,
   FaTrashAlt,
-  FaExclamationCircle,
 } from 'react-icons/fa';
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from '@hello-pangea/dnd';
+
+const columnsOrder = ['To do', 'In progress', 'Awaiting Feedback', 'Completed'];
 
 const TaskBoard: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -56,7 +62,7 @@ const TaskBoard: React.FC = () => {
             : [];
 
           const taskData: Task = {
-            id: doc.id,
+            id: doc.id, // doc.id is always a string
             title: data.title,
             description: data.description,
             priority: data.priority,
@@ -66,7 +72,7 @@ const TaskBoard: React.FC = () => {
             category: data.category,
             dueDate: data.dueDate,
             subtask: subtaskArray,
-            status: data.status,
+            status: data.status || 'To do', // Default to 'To do' if not set
           };
 
           return taskData;
@@ -158,7 +164,7 @@ const TaskBoard: React.FC = () => {
   const handleUpdateTask = async (updatedTask: Task) => {
     if (currentUser && updatedTask.id) {
       try {
-        const taskRef = doc(db, 'tasks', updatedTask.id);
+        const taskRef = doc(db, 'tasks', updatedTask.id); // task.id is now guaranteed to be a string
         await updateDoc(taskRef, {
           title: updatedTask.title,
           description: updatedTask.description,
@@ -193,6 +199,59 @@ const TaskBoard: React.FC = () => {
     }
   };
 
+  // Handler for drag end event
+  const onDragEnd = async (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+
+    // If no destination, do nothing
+    if (!destination) return;
+
+    // If the location hasn't changed, do nothing
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    // Find the task being dragged
+    const task = tasks.find((t) => t.id === draggableId);
+    if (!task) return;
+
+    // Determine the new status based on the destination droppableId
+    const newStatus = destination.droppableId;
+
+    // Update the task's status in Firestore
+    if (newStatus !== task.status) {
+      try {
+        const taskRef = doc(db, 'tasks', task.id); // task.id is guaranteed to be a string
+        await updateDoc(taskRef, {
+          status: newStatus,
+        });
+      } catch (err) {
+        console.error('Error updating task status:', err);
+      }
+    }
+  };
+
+  // Organize tasks by status
+  const tasksByStatus: { [key: string]: Task[] } = {
+    'To do': [],
+    'In progress': [],
+    'Awaiting Feedback': [],
+    'Completed': [],
+  };
+
+  tasks.forEach((task) => {
+    const status = task.status || 'To do';
+    if (tasksByStatus[status]) {
+      tasksByStatus[status].push(task);
+    } else {
+      // If the status is unexpected, add it to 'To do' by default
+      tasksByStatus['To do'].push(task);
+    }
+  });
+
   if (!currentUser) {
     return (
       <div className="p-6">
@@ -213,70 +272,102 @@ const TaskBoard: React.FC = () => {
           Your tasks will appear here.
         </p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-          {tasks.map((task) => (
-            <div
-              key={task.id}
-              className="bg-white p-6 rounded-lg shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] hover:shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] transition-shadow duration-200 flex flex-col justify-evenly "
-            >
-              <div className=" text-xl w-fit white text-white mb-2 px-2  rounded-lg bg-blue-600">
-                <strong> {task.category}</strong>
-              </div>
-              <h2 className="text-2xl font-semibold mb-4 text-black">
-                {task.title}
-              </h2>
-              <p className="text-gray-700 mb-4">{task.description.length > 35 ? task.description.slice(0,25)+("...") : task.description}</p>
-              <div className="flex items-center mb-4">
-                {task.assignedTo.map((id) => {
-                  const initials = getContactInitialsById(id);
-                  return (
-                    <div
-                      key={id}
-                      className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center mr-2"
-                      title={getContactNameById(id)}
-                    >
-                      {initials}
-                    </div>
-                  );
-                })}
-              </div>
-              <p className="text-gray-600 mb-2">
-                <strong>Category:</strong> {task.category}
-              </p>
-              {task.subtask && task.subtask.length > 0 && (
-                <p className="text-gray-600 mb-2">
-                  <strong>Subtasks:</strong> {getSubtaskCompletion(task)}
-                </p>
-              )}
-              <div className="flex items-center mb-2">
-                <FaExclamationCircle
-                  className={`mr-2 ${getPriorityColor(task.priority)}`}
-                />
-                <span className="text-gray-600">
-                  {task.priority}
-                </span>
-              </div>
-              <p className="text-gray-600 mb-2">
-                <strong>Status:</strong> {task.status}
-              </p>
-              {/* Buttons */}
-              <div className="flex justify-end mt-4 space-x-4">
-                <button
-                  onClick={() => openEditModal(task)}
-                  className="text-blue-500 hover:text-blue-700"
-                >
-                  <FaEdit size={20} />
-                </button>
-                <button
-                  onClick={() => handleDeleteTask(task.id!)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <FaTrashAlt size={20} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+            {columnsOrder.map((columnId) => (
+              <Droppable droppableId={columnId} key={columnId}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`flex-1 bg-gray-100 p-4 rounded-md shadow-md ${
+                      snapshot.isDraggingOver ? 'bg-blue-50' : ''
+                    }`}
+                  >
+                    <h2 className="text-xl font-semibold mb-4 text-center">
+                      {columnId}
+                    </h2>
+                    {tasksByStatus[columnId].length === 0 ? (
+                      null
+                    ) : (
+                      tasksByStatus[columnId].map((task, index) => (
+                        <Draggable
+                          key={task.id}
+                          draggableId={task.id} // task.id is guaranteed to be a string
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`bg-white p-4 rounded-lg shadow mb-4 ${
+                                snapshot.isDragging
+                                  ? 'bg-blue-100'
+                                  : 'bg-white'
+                              } transition-colors duration-200`}
+                            >
+                              <div
+                                className={`text-2xl font-medium mb-2 ${getPriorityColor(
+                                  task.priority
+                                )}`}
+                              >
+                                {task.priority}
+                              </div>
+                              <h3 className="text-lg font-semibold mb-2">
+                                {task.title}
+                              </h3>
+                              <p className="text-gray-700 mb-2">
+                                {task.description.length > 50
+                                  ? task.description.slice(0, 47) + '...'
+                                  : task.description}
+                              </p>
+                              <div className="flex items-center mb-2">
+                                {task.assignedTo.map((id) => {
+                                  const initials = getContactInitialsById(id);
+                                  return (
+                                    <div
+                                      key={id}
+                                      className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center mr-2 text-xs"
+                                      title={getContactNameById(id)}
+                                    >
+                                      {initials}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              {task.subtask && task.subtask.length > 0 && (
+                                <p className="text-gray-600 mb-2">
+                                  <strong>Subtasks:</strong> {getSubtaskCompletion(task)}
+                                </p>
+                              )}
+                              {/* Buttons */}
+                              <div className="flex justify-end space-x-2 mt-2">
+                                <button
+                                  onClick={() => openEditModal(task)}
+                                  className="text-blue-700 hover:text-blue-800"
+                                >
+                                  <FaEdit size={25} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteTask(task.id)}
+                                  className="text-red-700 hover:text-red-800"
+                                >
+                                  <FaTrashAlt size={25} />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))
+                    )}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            ))}
+          </div>
+        </DragDropContext>
       )}
       {/* Edit Task Modal */}
       {isEditModalOpen && selectedTask && (

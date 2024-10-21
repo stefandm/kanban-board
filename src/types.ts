@@ -7,7 +7,7 @@ export interface Subtask {
 }
 
 export interface Task {
-  id?: string;
+  id: string;
   title: string;
   description: string;
   priority: 'Low' | 'Normal' | 'Urgent';
