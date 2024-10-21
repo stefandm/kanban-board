@@ -1,11 +1,12 @@
 // src/components/TaskBoard.tsx
+
 import React, { useState, useEffect, useContext } from 'react';
 import {
   collection,
   query,
   where,
   onSnapshot,
-  Timestamp,
+  // Timestamp,
   doc,
   updateDoc,
   deleteDoc,
@@ -14,6 +15,11 @@ import { db } from '../firebase';
 import { AuthContext } from '../contexts/AuthContext';
 import { Task, Contact, Subtask } from '../types';
 import EditTaskModal from './EditTaskModal';
+import {
+  FaEdit,
+  FaTrashAlt,
+  FaExclamationCircle,
+} from 'react-icons/fa';
 
 const TaskBoard: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -109,6 +115,35 @@ const TaskBoard: React.FC = () => {
     return contact ? contact.name : 'Unknown Contact';
   };
 
+  const getContactInitialsById = (id: string) => {
+    const contact = contacts.find((c) => c.id === id);
+    if (contact && contact.name) {
+      const names = contact.name.split(' ');
+      const initials = names.map((n) => n[0]).join('');
+      return initials.toUpperCase();
+    }
+    return '?';
+  };
+
+  const getSubtaskCompletion = (task: Task) => {
+    const total = task.subtask?.length;
+    const completed = task.subtask?.filter((sub) => sub.status === 'done').length;
+    return `${completed}/${total}`;
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'Urgent':
+        return 'text-red-500';
+      case 'Normal':
+        return 'text-yellow-500';
+      case 'Low':
+        return 'text-green-500';
+      default:
+        return 'text-gray-500';
+    }
+  };
+
   const openEditModal = (task: Task) => {
     setSelectedTask(task);
     setIsEditModalOpen(true);
@@ -134,7 +169,6 @@ const TaskBoard: React.FC = () => {
           subtask: updatedTask.subtask,
           status: updatedTask.status,
         });
-        // No need to manually update tasks state; onSnapshot will handle it
         closeEditModal();
       } catch (err) {
         console.error('Error updating task:', err);
@@ -153,120 +187,88 @@ const TaskBoard: React.FC = () => {
       try {
         const taskRef = doc(db, 'tasks', taskId);
         await deleteDoc(taskRef);
-        // No need to manually update tasks state; onSnapshot will handle it
       } catch (err) {
         console.error('Error deleting task:', err);
       }
     }
   };
 
-  // Function to handle subtask status change
-  const handleSubtaskStatusChange = async (taskId: string, subtaskIndex: number) => {
-    if (!currentUser) return;
-
-    try {
-      // Find the task in the tasks state
-      const taskToUpdate = tasks.find((task) => task.id === taskId);
-      if (!taskToUpdate) return;
-
-      // Clone the subtasks array
-      const updatedSubtasks = [...(taskToUpdate.subtask || [])];
-
-      // Toggle the status of the subtask
-      const subtask = updatedSubtasks[subtaskIndex];
-      if (!subtask) return;
-
-      subtask.status = subtask.status === 'done' ? 'not done' : 'done';
-
-      // Update the task in Firestore
-      const taskRef = doc(db, 'tasks', taskId);
-      await updateDoc(taskRef, {
-        subtask: updatedSubtasks,
-      });
-
-      // No need to manually update tasks state; onSnapshot will handle it
-    } catch (error) {
-      console.error('Error updating subtask status:', error);
-    }
-  };
-
   if (!currentUser) {
     return (
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Please log in to view your tasks.</h1>
+        <h1 className="text-3xl font-bold mb-4 text-center text-blue-700">
+          Please log in to view your tasks.
+        </h1>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Task Board</h1>
+    <div className="p-6 bg-gradient-to-r from-blue-100 to-purple-100 min-h-screen">
+      <h1 className="text-3xl md:text-4xl mb-6 text-center font-bold text-blue-700">
+        Task Board
+      </h1>
       {tasks.length === 0 ? (
-        <p className="text-gray-700">Your tasks will appear here.</p>
+        <p className="text-gray-700 text-center text-lg">
+          Your tasks will appear here.
+        </p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tasks.map((task) => (
-            <div key={task.id} className="bg-white p-4 rounded shadow">
-              <h2 className="text-xl font-semibold mb-2">{task.title}</h2>
-              <p className="text-gray-700 mb-2">{task.description}</p>
-              <p className="text-gray-600 mb-1">
-                <strong>Assigned To:</strong>{' '}
-                {task.assignedTo.map((id) => getContactNameById(id)).join(', ')}
-              </p>
-              <p className="text-gray-600 mb-1">
+            <div
+              key={task.id}
+              className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200"
+            >
+              <h2 className="text-2xl font-semibold mb-4 text-blue-700">
+                {task.title}
+              </h2>
+              <p className="text-gray-700 mb-4">{task.description}</p>
+              <div className="flex items-center mb-4">
+                {task.assignedTo.map((id) => {
+                  const initials = getContactInitialsById(id);
+                  return (
+                    <div
+                      key={id}
+                      className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center mr-2"
+                      title={getContactNameById(id)}
+                    >
+                      {initials}
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-gray-600 mb-2">
                 <strong>Category:</strong> {task.category}
               </p>
-              <p className="text-gray-600 mb-1">
-                <strong>Due Date:</strong>{' '}
-                {task.dueDate instanceof Timestamp
-                  ? task.dueDate.toDate().toLocaleDateString()
-                  : 'No Due Date'}
-              </p>
-              <p className="text-gray-600 mb-1">
-                <strong>Priority:</strong> {task.priority}
-              </p>
               {task.subtask && task.subtask.length > 0 && (
-                <div className="mt-2">
-                  <strong>Subtasks:</strong>
-                  <ul className="list-none list-inside">
-                    {task.subtask.map((subtaskItem, subtaskIndex) => (
-                      <li key={subtaskIndex}>
-                        <label className="flex items-center">
-                          <input
-                            type="checkbox"
-                            className="mr-2"
-                            checked={subtaskItem.status === 'done'}
-                            onChange={() => handleSubtaskStatusChange(task.id!, subtaskIndex)}
-                          />
-                          <span
-                            className={
-                              subtaskItem.status === 'done' ? 'line-through text-gray-500' : ''
-                            }
-                          >
-                            {subtaskItem.description}
-                          </span>
-                        </label>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <p className="text-gray-600 mb-2">
+                  <strong>Subtasks:</strong> {getSubtaskCompletion(task)}
+                </p>
               )}
-              <p className="text-gray-600 mt-2">
+              <div className="flex items-center mb-2">
+                <FaExclamationCircle
+                  className={`mr-2 ${getPriorityColor(task.priority)}`}
+                />
+                <span className="text-gray-600">
+                  {task.priority} Priority
+                </span>
+              </div>
+              <p className="text-gray-600 mb-2">
                 <strong>Status:</strong> {task.status}
               </p>
               {/* Buttons */}
-              <div className="flex justify-between mt-4">
+              <div className="flex justify-end mt-4 space-x-4">
                 <button
                   onClick={() => openEditModal(task)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2 w-full"
+                  className="text-blue-500 hover:text-blue-700"
                 >
-                  Edit
+                  <FaEdit size={20} />
                 </button>
                 <button
                   onClick={() => handleDeleteTask(task.id!)}
-                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 w-full"
+                  className="text-red-500 hover:text-red-700"
                 >
-                  Remove
+                  <FaTrashAlt size={20} />
                 </button>
               </div>
             </div>
