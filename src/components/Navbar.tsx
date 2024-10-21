@@ -39,7 +39,7 @@ const Navbar: React.FC = () => {
           to="/summary"
           className="text-white text-2xl md:text-3xl font-bold flex items-center"
         >
-          <FaTasks className="mr-2" /> TaskApp
+          <FaTasks className="mr-2" /> Kanban
         </Link>
 
         {/* Hamburger Menu Button */}

@@ -1,7 +1,8 @@
 // src/components/Modal.tsx
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { FaTimes } from 'react-icons/fa';
+import useClickOutside from '../hooks/useClickOutside'; // Adjust the path as necessary
 
 interface ModalProps {
   onClose: () => void;
@@ -9,9 +10,25 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ onClose, children }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useClickOutside(modalRef, () => {
+    onClose();
+  });
+
+  useEffect(() => {
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="bg-white rounded-lg  w-full max-w-lg relative">
+      <div 
+        ref={modalRef}
+      className="bg-white rounded-lg  w-full max-w-lg relative">
         {/* Close Button */}
         <button
           onClick={onClose}
