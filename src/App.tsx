@@ -6,7 +6,7 @@ import Login from './components/Login';
 import TaskBoard from './components/TaskBoard';
 import Navbar from './components/Navbar';
 import CreateTask from './components/CreateTask';
-import Contacts from './components/Contacts'; // Import CreateContact
+import Contacts from './components/Contacts';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import Summary from './components/Summary';

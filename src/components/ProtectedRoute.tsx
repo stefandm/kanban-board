@@ -3,12 +3,13 @@ import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 
-interface ProtectedRouteProps {
-  children: JSX.Element;
-}
+const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+  const { currentUser, loading } = useContext(AuthContext);
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { currentUser } = useContext(AuthContext);
+  if (loading) {
+    // While loading is true, don't render the route (or display a loading spinner)
+    return null; // Or a loading component
+  }
 
   if (!currentUser) {
     return <Navigate to="/login" replace />;
