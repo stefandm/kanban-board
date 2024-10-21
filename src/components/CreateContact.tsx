@@ -7,7 +7,6 @@ import { AuthContext } from '../contexts/AuthContext';
 import { Contact } from '../types';
 import { FirebaseError } from 'firebase/app';
 
-
 const CreateContact: React.FC = () => {
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
@@ -35,21 +34,17 @@ const CreateContact: React.FC = () => {
         name,
         email,
         phoneNumber,
-        createdAt: new Date(),
+        createdAt: Timestamp.fromDate(new Date()), // Store as Timestamp
         userId: currentUser.uid,
       };
   
-      await addDoc(collection(db, 'contacts'), {
-        ...newContact,
-        createdAt: Timestamp.fromDate(newContact.createdAt),
-      });
+      await addDoc(collection(db, 'contacts'), newContact);
   
       // Redirect to Contacts Dashboard or another relevant page after successful creation
       navigate('/contacts');
-    } catch (err: unknown) {  // Use 'unknown' here
+    } catch (err: unknown) {
       console.error('Error adding contact:', err);
   
-      // Type checking using type guards
       if (err instanceof FirebaseError) {
         setError(err.message);
       } else if (err instanceof Error) {

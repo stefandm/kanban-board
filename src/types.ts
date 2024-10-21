@@ -8,9 +8,9 @@ export interface Task {
   priority: 'Low' | 'Normal' | 'Urgent';
   createdAt: Timestamp;
   userId: string;
-  assignedTo: string; // Contact ID
+  assignedTo:string[];
   category: string;
-  dueDate: Date;
+  dueDate: Timestamp;
   subtask?: string[];
   status: string;
 }
@@ -20,6 +20,6 @@ export interface Contact {
   name: string;
   email: string;
   phoneNumber: string;
-  createdAt: Date;
+  createdAt: Timestamp;
   userId: string;
 }

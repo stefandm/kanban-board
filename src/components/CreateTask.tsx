@@ -18,13 +18,13 @@ const CreateTask: React.FC = () => {
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [priority, setPriority] = useState<'Low' | 'Normal' | 'Urgent'>('Normal');
-  const [assignedTo, setAssignedTo] = useState<string[]>([]);
+  const [assignedTo, setAssignedTo] = useState<string[]>([]); // Changed to string[]
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [category, setCategory] = useState<string>('');
   const [categories, setCategories] = useState<string[]>([]);
   const [dueDate, setDueDate] = useState<string>('');
-  const [subtaskInput, setSubtaskInput] = useState<string>(''); // Input for new subtask
-  const [subtasks, setSubtasks] = useState<string[]>([]); // List of subtasks
+  const [subtaskInput, setSubtaskInput] = useState<string>('');
+  const [subtask, setSubtask] = useState<string[]>([]);
   const [error, setError] = useState<string>('');
   const navigate = useNavigate();
   const { currentUser } = useContext(AuthContext);
@@ -100,13 +100,12 @@ const CreateTask: React.FC = () => {
         priority,
         assignedTo,
         category,
-        dueDate: Timestamp.fromDate(new Date(dueDate)),
+        dueDate: Timestamp.fromDate(new Date(dueDate)), // Store as Timestamp
         createdAt: Timestamp.fromDate(new Date()),
         userId: currentUser.uid,
-        subtasks, // Include subtasks array
+        subtask,
         status: 'To do',
       });
-      // Redirect to TaskBoard or another page after successful creation
       navigate('/dashboard');
     } catch (err: unknown) {
       console.error('Error adding task:', err);
@@ -134,14 +133,14 @@ const CreateTask: React.FC = () => {
 
   const handleAddSubtask = () => {
     if (subtaskInput.trim() !== '') {
-      setSubtasks([...subtasks, subtaskInput.trim()]);
+      setSubtask([...subtask, subtaskInput.trim()]);
       setSubtaskInput('');
     }
   };
 
   const handleRemoveSubtask = (index: number) => {
-    const newSubtasks = subtasks.filter((_, idx) => idx !== index);
-    setSubtasks(newSubtasks);
+    const newSubtasks = subtask.filter((_, idx) => idx !== index);
+    setSubtask(newSubtasks);
   };
 
   return (
@@ -151,9 +150,8 @@ const CreateTask: React.FC = () => {
         className="bg-white p-6 rounded shadow-md w-full max-w-md"
       >
         <h2 className="text-2xl mb-4 text-center">Create New Task</h2>
-        {error && (
-          <div className="mb-4 text-red-500 text-sm">{error}</div>
-        )}
+        {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
+        {/* Title */}
         <div className="mb-4">
           <label className="block text-gray-700">Title</label>
           <input
@@ -165,6 +163,7 @@ const CreateTask: React.FC = () => {
             placeholder="Task Title"
           />
         </div>
+        {/* Description */}
         <div className="mb-4">
           <label className="block text-gray-700">Description</label>
           <textarea
@@ -176,6 +175,7 @@ const CreateTask: React.FC = () => {
             rows={4}
           ></textarea>
         </div>
+        {/* Assigned To */}
         <div className="mb-4">
           <label className="block text-gray-700">Assigned To</label>
           <select
@@ -196,6 +196,7 @@ const CreateTask: React.FC = () => {
             multiple contacts.
           </p>
         </div>
+        {/* Category */}
         <div className="mb-4">
           <label className="block text-gray-700">Category</label>
           <input
@@ -212,6 +213,7 @@ const CreateTask: React.FC = () => {
             ))}
           </datalist>
         </div>
+        {/* Due Date */}
         <div className="mb-4">
           <label className="block text-gray-700">Due Date</label>
           <input
@@ -222,6 +224,7 @@ const CreateTask: React.FC = () => {
             onChange={(e) => setDueDate(e.target.value)}
           />
         </div>
+        {/* Subtasks */}
         <div className="mb-4">
           <label className="block text-gray-700">Subtasks</label>
           <div className="flex">
@@ -240,9 +243,9 @@ const CreateTask: React.FC = () => {
               Add
             </button>
           </div>
-          {subtasks.length > 0 && (
+          {subtask.length > 0 && (
             <ul className="mt-2">
-              {subtasks.map((subtask, index) => (
+              {subtask.map((subtask, index) => (
                 <li
                   key={index}
                   className="flex items-center justify-between bg-gray-200 p-2 rounded mt-1"
@@ -260,6 +263,7 @@ const CreateTask: React.FC = () => {
             </ul>
           )}
         </div>
+        {/* Priority */}
         <div className="mb-6">
           <label className="block text-gray-700">Priority</label>
           <select
@@ -274,6 +278,7 @@ const CreateTask: React.FC = () => {
             <option value="Urgent">Urgent</option>
           </select>
         </div>
+        {/* Submit Button */}
         <button
           type="submit"
           className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
