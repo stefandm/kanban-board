@@ -20,6 +20,7 @@ import {
   FaEdit,
 } from 'react-icons/fa';
 import Select from 'react-select';
+import CreatableSelect from 'react-select/creatable';
 
 interface EditTaskModalProps {
   task: Task;
@@ -32,7 +33,7 @@ interface EditTaskModalProps {
 const EditTaskModal: React.FC<EditTaskModalProps> = ({
   task,
   contacts,
-  categories,
+  categories: initialCategories,
   onClose,
   onUpdate,
 }) => {
@@ -43,6 +44,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   );
   const [assignedTo, setAssignedTo] = useState<Contact[]>([]);
   const [category, setCategory] = useState<string>(task.category);
+  const [categories, setCategories] = useState<string[]>(initialCategories);
   const [dueDate, setDueDate] = useState<string>(
     task.dueDate instanceof Timestamp
       ? task.dueDate.toDate().toISOString().substr(0, 10)
@@ -144,6 +146,15 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
     setSubtask(updatedSubtasks);
   };
 
+  // Function to handle creation of a new category and add it to the categories list
+  const handleCreateCategory = (inputValue: string) => {
+    const newCategory = inputValue.trim();
+    if (newCategory && !categories.includes(newCategory)) {
+      setCategories((prev) => [...prev, newCategory]);
+    }
+    setCategory(newCategory);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg relative overflow-y-auto max-h-screen">
@@ -235,19 +246,22 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
             </label>
             <div className="relative">
               <FaTag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                list="category-list"
-                required
-                className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="Enter or select a category"
-              />
-              <datalist id="category-list">
-                {categories.map((cat, index) => (
-                  <option key={index} value={cat} />
-                ))}
-              </datalist>
+              <div className="pl-12">
+                <CreatableSelect
+                  isClearable
+                  options={categories.map((cat) => ({ value: cat, label: cat }))}
+                  value={category ? { value: category, label: category } : null}
+                  onChange={(newValue) => {
+                    if (newValue) {
+                      setCategory(newValue.value);
+                    } else {
+                      setCategory('');
+                    }
+                  }}
+                  onCreateOption={handleCreateCategory}
+                  placeholder="Enter or select a category"
+                />
+              </div>
             </div>
           </div>
           {/* Due Date */}
