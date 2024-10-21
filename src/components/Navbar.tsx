@@ -26,6 +26,12 @@ const Navbar: React.FC = () => {
       <div>
         {currentUser ? (
           <>
+          <Link
+              to="/create-task"
+              className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 mr-4"
+            >
+              Create Task
+            </Link>
             <span className="text-white mr-4">
               {currentUser.email}
             </span>
@@ -38,6 +44,7 @@ const Navbar: React.FC = () => {
           </>
         ) : (
           <>
+            
             <Link to="/login" className="text-white mr-4 hover:underline">
               Login
             </Link>

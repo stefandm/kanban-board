@@ -5,8 +5,9 @@ import Signup from './components/Signup';
 import Login from './components/Login';
 import TaskBoard from './components/TaskBoard';
 import Navbar from './components/Navbar';
+import CreateTask from './components/CreateTask';
 import ProtectedRoute from './components/ProtectedRoute';
-import { AuthProvider } from './AuthContext'; // Or UserProvider based on previous step
+import { AuthProvider } from './AuthContext';
 
 const App: React.FC = () => {
   return (
@@ -19,6 +20,14 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <TaskBoard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/create-task"
+            element={
+              <ProtectedRoute>
+                <CreateTask />
               </ProtectedRoute>
             }
           />
