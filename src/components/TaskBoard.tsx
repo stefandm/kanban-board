@@ -1,6 +1,5 @@
 // src/components/TaskBoard.tsx
 import React, { useState, useEffect, useContext } from 'react';
-import { db } from '../firebase';
 import {
   collection,
   query,
@@ -9,7 +8,9 @@ import {
   Timestamp,
   doc,
   updateDoc,
+  deleteDoc,
 } from 'firebase/firestore';
+import { db } from '../firebase';
 import { AuthContext } from '../contexts/AuthContext';
 import { Task, Contact } from '../types';
 import EditTaskModal from './EditTaskModal';
@@ -137,6 +138,25 @@ const TaskBoard: React.FC = () => {
     }
   };
 
+  // Function to delete a task with confirmation
+  const handleDeleteTask = async (taskId: string) => {
+    if (currentUser && taskId) {
+      const confirmDelete = window.confirm(
+        'Are you sure you want to delete this task? This action cannot be undone.'
+      );
+      if (!confirmDelete) return;
+
+      try {
+        const taskRef = doc(db, 'tasks', taskId);
+        await deleteDoc(taskRef);
+        // Remove the task from local state
+        setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+      } catch (err) {
+        console.error('Error deleting task:', err);
+      }
+    }
+  };
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Task Board</h1>
@@ -177,13 +197,21 @@ const TaskBoard: React.FC = () => {
               <p className="text-gray-600 mt-2">
                 <strong>Status:</strong> {task.status}
               </p>
-              {/* Edit Button */}
-              <button
-                onClick={() => openEditModal(task)}
-                className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Edit
-              </button>
+              {/* Buttons */}
+              <div className="flex justify-between mt-4">
+                <button
+                  onClick={() => openEditModal(task)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2 w-full"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDeleteTask(task.id!)}
+                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 w-full"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
           ))}
         </div>
