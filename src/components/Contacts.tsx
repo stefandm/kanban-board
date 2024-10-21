@@ -198,7 +198,7 @@ const Contacts: React.FC = () => {
       </div>
 
       {/* Contacts List Section on the Right */}
-      <div className="md:w-[20vw] max-h-[90vh] overflow-y-auto scroll-smooth">
+      <div className="md:w-[20vw] max-h-[95vh] overflow-y-auto scroll-smooth">
         {contacts.length === 0 ? (
           <div className="text-gray-700 mt-[5vh] justify-center items-center text-center text-2xl">
             No contacts available.
