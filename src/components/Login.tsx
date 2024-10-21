@@ -17,7 +17,7 @@ const Login: React.FC = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       // Redirect to dashboard or home page after successful login
-      navigate('/dashboard');
+      navigate('/summary');
     } catch (err: unknown) { // Use 'unknown' to safely handle different error types
       if (err instanceof FirebaseError) {
         setError(err.message);
@@ -37,7 +37,7 @@ const Login: React.FC = () => {
       const guestPassword = 'guestpassword';
       await signInWithEmailAndPassword(auth, guestEmail, guestPassword);
       // Redirect to dashboard or home page after successful login
-      navigate('/dashboard');
+      navigate('/summary');
     } catch (err: unknown) { // Use 'unknown' here as well
       if (err instanceof FirebaseError) {
         setError(err.message);

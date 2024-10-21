@@ -1,7 +1,6 @@
 // src/components/Navbar.tsx
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -20,15 +19,27 @@ const Navbar: React.FC = () => {
 
   return (
     <nav className="bg-blue-500 p-4 flex justify-between items-center">
-      <Link to="/dashboard" className="text-white text-xl font-bold">
+      <Link to="/summary" className="text-white text-xl font-bold">
         TaskApp
       </Link>
       <div className="flex items-center">
         {currentUser ? (
           <>
             <Link
-              to="/create-task"
+              to="/summary"
               className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 mr-2"
+            >
+              Summary
+            </Link>
+            <Link
+              to="/dashboard"
+              className="bg-blue-700 text-white px-3 py-1 rounded hover:bg-blue-800 mr-2"
+            >
+              Dashboard
+            </Link>
+            <Link
+              to="/create-task"
+              className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 mr-2"
             >
               Create Task
             </Link>
@@ -38,9 +49,7 @@ const Navbar: React.FC = () => {
             >
               Contacts
             </Link>
-            <span className="text-white mr-4">
-              {currentUser.email}
-            </span>
+            <span className="text-white mr-4">{currentUser.email}</span>
             <button
               onClick={handleLogout}
               className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"

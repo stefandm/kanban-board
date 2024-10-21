@@ -239,6 +239,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
             >
               <option value="To do">To do</option>
               <option value="In progress">In progress</option>
+              <option value="Awaiting Feedback">Awaiting Feedback</option>
               <option value="Completed">Completed</option>
             </select>
           </div>
