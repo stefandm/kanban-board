@@ -1,6 +1,6 @@
 // src/components/EditTaskModal.tsx
 import React, { useState } from 'react';
-import { Task, Contact } from '../types';
+import { Task, Contact, Subtask } from '../types';
 import { Timestamp } from 'firebase/firestore';
 
 interface EditTaskModalProps {
@@ -31,7 +31,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
       : ''
   );
   const [subtaskInput, setSubtaskInput] = useState<string>('');
-  const [subtask, setSubtask] = useState<string[]>(task.subtask || []);
+  const [subtask, setSubtask] = useState<Subtask[]>(task.subtask || []);
   const [status, setStatus] = useState<string>(task.status);
   const [error, setError] = useState<string>('');
 
@@ -48,7 +48,11 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
 
   const handleAddSubtask = () => {
     if (subtaskInput.trim() !== '') {
-      setSubtask([...subtask, subtaskInput.trim()]);
+      const newSubtask: Subtask = {
+        description: subtaskInput.trim(),
+        status: 'not done',
+      };
+      setSubtask([...subtask, newSubtask]);
       setSubtaskInput('');
     }
   };
@@ -56,6 +60,22 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   const handleRemoveSubtask = (index: number) => {
     const newSubtasks = subtask.filter((_, idx) => idx !== index);
     setSubtask(newSubtasks);
+  };
+
+  const handleSubtaskStatusChange = (index: number) => {
+    const updatedSubtasks = [...subtask];
+    updatedSubtasks[index].status =
+      updatedSubtasks[index].status === 'done' ? 'not done' : 'done';
+    setSubtask(updatedSubtasks);
+  };
+
+  const handleSubtaskDescriptionChange = (
+    index: number,
+    newDescription: string
+  ) => {
+    const updatedSubtasks = [...subtask];
+    updatedSubtasks[index].description = newDescription;
+    setSubtask(updatedSubtasks);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -196,12 +216,31 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
             </div>
             {subtask.length > 0 && (
               <ul className="mt-2">
-                {subtask.map((subtask, index) => (
+                {subtask.map((subtaskItem, index) => (
                   <li
                     key={index}
                     className="flex items-center justify-between bg-gray-200 p-2 rounded mt-1"
                   >
-                    <span>{subtask}</span>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        className="mr-2"
+                        checked={subtaskItem.status === 'done'}
+                        onChange={() => handleSubtaskStatusChange(index)}
+                      />
+                      <input
+                        type="text"
+                        className={`flex-1 bg-transparent border-none focus:outline-none ${
+                          subtaskItem.status === 'done'
+                            ? 'line-through text-gray-500'
+                            : ''
+                        }`}
+                        value={subtaskItem.description}
+                        onChange={(e) =>
+                          handleSubtaskDescriptionChange(index, e.target.value)
+                        }
+                      />
+                    </div>
                     <button
                       type="button"
                       onClick={() => handleRemoveSubtask(index)}
@@ -239,7 +278,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
             >
               <option value="To do">To do</option>
               <option value="In progress">In progress</option>
-              <option value="Awaiting Feedback">Awaiting Feedback</option>
+              <option value="Awaiting feedback">Awaiting feedback</option>
               <option value="Completed">Completed</option>
             </select>
           </div>

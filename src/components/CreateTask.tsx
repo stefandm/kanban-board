@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
-import { Contact } from '../types';
+import { Contact, Subtask } from '../types';
 import { FirebaseError } from 'firebase/app';
 import {
   FaPlusCircle,
@@ -37,7 +37,7 @@ const CreateTask: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [dueDate, setDueDate] = useState<string>('');
   const [subtaskInput, setSubtaskInput] = useState<string>('');
-  const [subtask, setSubtask] = useState<string[]>([]);
+  const [subtask, setSubtask] = useState<Subtask[]>([]);
   const [error, setError] = useState<string>('');
   const navigate = useNavigate();
   const { currentUser } = useContext(AuthContext);
@@ -135,7 +135,11 @@ const CreateTask: React.FC = () => {
 
   const handleAddSubtask = () => {
     if (subtaskInput.trim() !== '') {
-      setSubtask([...subtask, subtaskInput.trim()]);
+      const newSubtask: Subtask = {
+        description: subtaskInput.trim(),
+        status: 'not done',
+      };
+      setSubtask([...subtask, newSubtask]);
       setSubtaskInput('');
     }
   };
@@ -291,7 +295,7 @@ const CreateTask: React.FC = () => {
                   key={index}
                   className="flex items-center justify-between bg-gray-200 p-3 rounded-lg mt-2"
                 >
-                  <span>{subtaskItem}</span>
+                  <span>{subtaskItem.description}</span>
                   <button
                     type="button"
                     onClick={() => handleRemoveSubtask(index)}

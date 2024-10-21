@@ -1,6 +1,11 @@
 // src/types.ts
 import { Timestamp } from 'firebase/firestore';
 
+export interface Subtask {
+  description: string;
+  status: 'not done' | 'done';
+}
+
 export interface Task {
   id?: string;
   title: string;
@@ -11,7 +16,7 @@ export interface Task {
   assignedTo:string[];
   category: string;
   dueDate: Timestamp;
-  subtask?: string[];
+  subtask?: Subtask[];
   status: string;
 }
 

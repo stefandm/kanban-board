@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { AuthContext } from '../contexts/AuthContext';
-import { Task, Contact } from '../types';
+import { Task, Contact, Subtask } from '../types';
 import EditTaskModal from './EditTaskModal';
 
 const TaskBoard: React.FC = () => {
@@ -44,11 +44,26 @@ const TaskBoard: React.FC = () => {
             ? data.assignedTo
             : [data.assignedTo];
 
-          return {
+          // Ensure subtask is always an array of Subtask
+          const subtaskArray: Subtask[] = Array.isArray(data.subtask)
+            ? (data.subtask as Subtask[])
+            : [];
+
+          const taskData: Task = {
             id: doc.id,
-            ...(data as Omit<Task, 'assignedTo'>),
+            title: data.title,
+            description: data.description,
+            priority: data.priority,
+            createdAt: data.createdAt,
+            userId: data.userId,
             assignedTo: assignedToArray,
+            category: data.category,
+            dueDate: data.dueDate,
+            subtask: subtaskArray,
+            status: data.status,
           };
+
+          return taskData;
         });
         setTasks(tasksData);
       });
@@ -145,6 +160,36 @@ const TaskBoard: React.FC = () => {
     }
   };
 
+  // Function to handle subtask status change
+  const handleSubtaskStatusChange = async (taskId: string, subtaskIndex: number) => {
+    if (!currentUser) return;
+
+    try {
+      // Find the task in the tasks state
+      const taskToUpdate = tasks.find((task) => task.id === taskId);
+      if (!taskToUpdate) return;
+
+      // Clone the subtasks array
+      const updatedSubtasks = [...(taskToUpdate.subtask || [])];
+
+      // Toggle the status of the subtask
+      const subtask = updatedSubtasks[subtaskIndex];
+      if (!subtask) return;
+
+      subtask.status = subtask.status === 'done' ? 'not done' : 'done';
+
+      // Update the task in Firestore
+      const taskRef = doc(db, 'tasks', taskId);
+      await updateDoc(taskRef, {
+        subtask: updatedSubtasks,
+      });
+
+      // No need to manually update tasks state; onSnapshot will handle it
+    } catch (error) {
+      console.error('Error updating subtask status:', error);
+    }
+  };
+
   if (!currentUser) {
     return (
       <div className="p-6">
@@ -183,9 +228,25 @@ const TaskBoard: React.FC = () => {
               {task.subtask && task.subtask.length > 0 && (
                 <div className="mt-2">
                   <strong>Subtasks:</strong>
-                  <ul className="list-disc list-inside">
-                    {task.subtask.map((subtask, index) => (
-                      <li key={index}>{subtask}</li>
+                  <ul className="list-none list-inside">
+                    {task.subtask.map((subtaskItem, subtaskIndex) => (
+                      <li key={subtaskIndex}>
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            className="mr-2"
+                            checked={subtaskItem.status === 'done'}
+                            onChange={() => handleSubtaskStatusChange(task.id!, subtaskIndex)}
+                          />
+                          <span
+                            className={
+                              subtaskItem.status === 'done' ? 'line-through text-gray-500' : ''
+                            }
+                          >
+                            {subtaskItem.description}
+                          </span>
+                        </label>
+                      </li>
                     ))}
                   </ul>
                 </div>
