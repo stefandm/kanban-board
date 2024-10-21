@@ -1,7 +1,25 @@
 // src/components/EditTaskModal.tsx
-import React, { useState } from 'react';
-import { Task, Contact, Subtask } from '../types';
-import { Timestamp } from 'firebase/firestore';
+
+import React, { useState, useEffect } from 'react';
+import { db } from '../firebase';
+import {
+  doc,
+  updateDoc,
+  Timestamp,
+} from 'firebase/firestore';
+import { Contact, Task, Subtask } from '../types';
+import {
+  FaTimes,
+  FaUser,
+  FaTag,
+  FaCalendarAlt,
+  FaTasks,
+  FaListAlt,
+  FaExclamationCircle,
+  FaTrashAlt,
+  FaEdit,
+} from 'react-icons/fa';
+import Select from 'react-select';
 
 interface EditTaskModalProps {
   task: Task;
@@ -21,64 +39,28 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   const [title, setTitle] = useState<string>(task.title);
   const [description, setDescription] = useState<string>(task.description);
   const [priority, setPriority] = useState<'Low' | 'Normal' | 'Urgent'>(
-    task.priority
+    task.priority || 'Normal'
   );
-  const [assignedTo, setAssignedTo] = useState<string[]>(task.assignedTo);
+  const [assignedTo, setAssignedTo] = useState<Contact[]>([]);
   const [category, setCategory] = useState<string>(task.category);
   const [dueDate, setDueDate] = useState<string>(
     task.dueDate instanceof Timestamp
-      ? task.dueDate.toDate().toISOString().split('T')[0]
+      ? task.dueDate.toDate().toISOString().substr(0, 10)
       : ''
   );
   const [subtaskInput, setSubtaskInput] = useState<string>('');
   const [subtask, setSubtask] = useState<Subtask[]>(task.subtask || []);
-  const [status, setStatus] = useState<string>(task.status);
   const [error, setError] = useState<string>('');
 
-  const handleAssignedToChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const options = e.target.options;
-    const selectedContacts: string[] = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selectedContacts.push(options[i].value);
-      }
-    }
-    setAssignedTo(selectedContacts);
-  };
+  useEffect(() => {
+    // Map assignedTo IDs to Contact objects
+    const assignedContacts = contacts.filter((contact) =>
+      task.assignedTo.includes(contact.id || '')
+    );
+    setAssignedTo(assignedContacts);
+  }, [contacts, task.assignedTo]);
 
-  const handleAddSubtask = () => {
-    if (subtaskInput.trim() !== '') {
-      const newSubtask: Subtask = {
-        description: subtaskInput.trim(),
-        status: 'not done',
-      };
-      setSubtask([...subtask, newSubtask]);
-      setSubtaskInput('');
-    }
-  };
-
-  const handleRemoveSubtask = (index: number) => {
-    const newSubtasks = subtask.filter((_, idx) => idx !== index);
-    setSubtask(newSubtasks);
-  };
-
-  const handleSubtaskStatusChange = (index: number) => {
-    const updatedSubtasks = [...subtask];
-    updatedSubtasks[index].status =
-      updatedSubtasks[index].status === 'done' ? 'not done' : 'done';
-    setSubtask(updatedSubtasks);
-  };
-
-  const handleSubtaskDescriptionChange = (
-    index: number,
-    newDescription: string
-  ) => {
-    const updatedSubtasks = [...subtask];
-    updatedSubtasks[index].description = newDescription;
-    setSubtask(updatedSubtasks);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleUpdateTask = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -100,153 +82,207 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
       title,
       description,
       priority,
-      assignedTo,
+      assignedTo: assignedTo.map((contact) => contact.id!),
       category,
       dueDate: Timestamp.fromDate(new Date(dueDate)),
       subtask,
-      status,
     };
 
-    onUpdate(updatedTask);
+    try {
+      const taskRef = doc(db, 'tasks', task.id!);
+      await updateDoc(taskRef, {
+        title: updatedTask.title,
+        description: updatedTask.description,
+        priority: updatedTask.priority,
+        assignedTo: updatedTask.assignedTo,
+        category: updatedTask.category,
+        dueDate: updatedTask.dueDate,
+        subtask: updatedTask.subtask,
+      });
+      onUpdate(updatedTask);
+      onClose();
+    } catch (err) {
+      console.error('Error updating task:', err);
+      setError('Failed to update task. Please try again.');
+    }
+  };
+
+  const handleAddSubtask = () => {
+    if (subtaskInput.trim() !== '') {
+      const newSubtask: Subtask = {
+        description: subtaskInput.trim(),
+        status: 'not done',
+      };
+      setSubtask([...subtask, newSubtask]);
+      setSubtaskInput('');
+    }
+  };
+
+  const handleRemoveSubtask = (index: number) => {
+    const newSubtasks = subtask.filter((_, idx) => idx !== index);
+    setSubtask(newSubtasks);
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white p-6 rounded shadow-md w-full max-w-md relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg relative">
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+          className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 focus:outline-none"
         >
-          &#10005;
+          <FaTimes size={20} />
         </button>
-        <h2 className="text-2xl mb-4 text-center">Edit Task</h2>
-        {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
-        <form onSubmit={handleSubmit}>
+        <h2 className="text-3xl md:text-4xl mb-6 text-center font-bold text-blue-700 flex items-center justify-center">
+          <FaEdit className="mr-3 text-blue-700 text-4xl" /> Edit Task
+        </h2>
+        {error && <div className="mb-6 text-red-500 text-md">{error}</div>}
+        <form onSubmit={handleUpdateTask}>
           {/* Title */}
-          <div className="mb-4">
-            <label className="block text-gray-700">Title</label>
-            <input
-              type="text"
-              required
-              className="w-full px-3 py-2 border rounded mt-1"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Task Title"
-            />
-          </div>
-          {/* Description */}
-          <div className="mb-4">
-            <label className="block text-gray-700">Description</label>
-            <textarea
-              required
-              className="w-full px-3 py-2 border rounded mt-1"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Task Description"
-              rows={4}
-            ></textarea>
-          </div>
-          {/* Assigned To */}
-          <div className="mb-4">
-            <label className="block text-gray-700">Assigned To</label>
-            <select
-              multiple
-              required
-              className="w-full px-3 py-2 border rounded mt-1"
-              value={assignedTo}
-              onChange={handleAssignedToChange}
-            >
-              {contacts.map((contact) => (
-                <option key={contact.id} value={contact.id}>
-                  {contact.name} ({contact.email})
-                </option>
-              ))}
-            </select>
-            <p className="text-sm text-gray-500 mt-1">
-              Hold down the Ctrl (Windows) or Command (Mac) key to select
-              multiple contacts.
-            </p>
-          </div>
-          {/* Category */}
-          <div className="mb-4">
-            <label className="block text-gray-700">Category</label>
-            <input
-              list="category-list"
-              required
-              className="w-full px-3 py-2 border rounded mt-1"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="Enter or select a category"
-            />
-            <datalist id="category-list">
-              {categories.map((cat, index) => (
-                <option key={index} value={cat} />
-              ))}
-            </datalist>
-          </div>
-          {/* Due Date */}
-          <div className="mb-4">
-            <label className="block text-gray-700">Due Date</label>
-            <input
-              type="date"
-              required
-              className="w-full px-3 py-2 border rounded mt-1"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-            />
-          </div>
-          {/* Subtasks */}
-          <div className="mb-4">
-            <label className="block text-gray-700">Subtasks</label>
-            <div className="flex">
+          <div className="mb-6">
+            <label className="block text-gray-700 text-lg font-medium mb-2">
+              Title
+            </label>
+            <div className="relative">
+              <FaTasks className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                className="w-full px-3 py-2 border rounded-l mt-1"
-                value={subtaskInput}
-                onChange={(e) => setSubtaskInput(e.target.value)}
-                placeholder="Enter a subtask"
+                required
+                className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Task Title"
               />
+            </div>
+          </div>
+          {/* Description */}
+          <div className="mb-6">
+            <label className="block text-gray-700 text-lg font-medium mb-2">
+              Description
+            </label>
+            <div className="relative">
+              <FaListAlt className="absolute left-3 top-3 text-gray-400" />
+              <textarea
+                required
+                className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Task Description"
+                rows={4}
+              ></textarea>
+            </div>
+          </div>
+          {/* Assigned To */}
+          <div className="mb-6">
+            <label className="block text-gray-700 text-lg font-medium mb-2">
+              Assigned To
+            </label>
+            <div className="relative">
+              <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <div className="pl-12">
+                <Select
+                  isMulti
+                  options={contacts.map((contact) => ({
+                    value: contact.id,
+                    label: `${contact.name} (${contact.email})`,
+                  }))}
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                  value={assignedTo.map((contact) => ({
+                    value: contact.id,
+                    label: `${contact.name} (${contact.email})`,
+                  }))}
+                  onChange={(selectedOptions) => {
+                    setAssignedTo(
+                      selectedOptions.map((option) => {
+                        const contact = contacts.find(
+                          (c) => c.id === option.value
+                        );
+                        return contact!;
+                      })
+                    );
+                  }}
+                  placeholder="Select Contacts"
+                />
+              </div>
+            </div>
+          </div>
+          {/* Category */}
+          <div className="mb-6">
+            <label className="block text-gray-700 text-lg font-medium mb-2">
+              Category
+            </label>
+            <div className="relative">
+              <FaTag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                list="category-list"
+                required
+                className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                placeholder="Enter or select a category"
+              />
+              <datalist id="category-list">
+                {categories.map((cat, index) => (
+                  <option key={index} value={cat} />
+                ))}
+              </datalist>
+            </div>
+          </div>
+          {/* Due Date */}
+          <div className="mb-6">
+            <label className="block text-gray-700 text-lg font-medium mb-2">
+              Due Date
+            </label>
+            <div className="relative">
+              <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="date"
+                required
+                className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+              />
+            </div>
+          </div>
+          {/* Subtasks */}
+          <div className="mb-6">
+            <label className="block text-gray-700 text-lg font-medium mb-2">
+              Subtasks
+            </label>
+            <div className="flex">
+              <div className="relative w-full">
+                <FaTasks className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  className="w-full pl-12 pr-4 py-3 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={subtaskInput}
+                  onChange={(e) => setSubtaskInput(e.target.value)}
+                  placeholder="Enter a subtask"
+                />
+              </div>
               <button
                 type="button"
                 onClick={handleAddSubtask}
-                className="bg-blue-500 text-white px-4 py-2 rounded-r mt-1 hover:bg-blue-600"
+                className="bg-blue-600 text-white px-4 py-3 rounded-r-lg hover:bg-blue-700 transition-colors duration-200"
               >
                 Add
               </button>
             </div>
             {subtask.length > 0 && (
-              <ul className="mt-2">
+              <ul className="mt-4">
                 {subtask.map((subtaskItem, index) => (
                   <li
                     key={index}
-                    className="flex items-center justify-between bg-gray-200 p-2 rounded mt-1"
+                    className="flex items-center justify-between bg-gray-200 p-3 rounded-lg mt-2"
                   >
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        className="mr-2"
-                        checked={subtaskItem.status === 'done'}
-                        onChange={() => handleSubtaskStatusChange(index)}
-                      />
-                      <input
-                        type="text"
-                        className={`flex-1 bg-transparent border-none focus:outline-none ${
-                          subtaskItem.status === 'done'
-                            ? 'line-through text-gray-500'
-                            : ''
-                        }`}
-                        value={subtaskItem.description}
-                        onChange={(e) =>
-                          handleSubtaskDescriptionChange(index, e.target.value)
-                        }
-                      />
-                    </div>
+                    <span>{subtaskItem.description}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveSubtask(index)}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-500 hover:text-red-700 transition-colors duration-200"
                     >
-                      Remove
+                      <FaTrashAlt />
                     </button>
                   </li>
                 ))}
@@ -254,41 +290,35 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
             )}
           </div>
           {/* Priority */}
-          <div className="mb-4">
-            <label className="block text-gray-700">Priority</label>
-            <select
-              className="w-full px-3 py-2 border rounded mt-1"
-              value={priority}
-              onChange={(e) =>
-                setPriority(e.target.value as 'Low' | 'Normal' | 'Urgent')
-              }
-            >
-              <option value="Low">Low</option>
-              <option value="Normal">Normal</option>
-              <option value="Urgent">Urgent</option>
-            </select>
-          </div>
-          {/* Status */}
           <div className="mb-6">
-            <label className="block text-gray-700">Status</label>
-            <select
-              className="w-full px-3 py-2 border rounded mt-1"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <option value="To do">To do</option>
-              <option value="In progress">In progress</option>
-              <option value="Awaiting feedback">Awaiting feedback</option>
-              <option value="Completed">Completed</option>
-            </select>
+            <label className="block text-gray-700 text-lg font-medium mb-2">
+              Priority
+            </label>
+            <div className="relative">
+              <FaExclamationCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <select
+                className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={priority}
+                onChange={(e) =>
+                  setPriority(e.target.value as 'Low' | 'Normal' | 'Urgent')
+                }
+              >
+                <option value="Low">Low</option>
+                <option value="Normal">Normal</option>
+                <option value="Urgent">Urgent</option>
+              </select>
+            </div>
           </div>
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
-          >
-            Update Task
-          </button>
+          {/* Buttons */}
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors duration-200 text-lg font-semibold flex items-center justify-center"
+            >
+              <FaEdit className="mr-2" />
+              Update Task
+            </button>
+          </div>
         </form>
       </div>
     </div>

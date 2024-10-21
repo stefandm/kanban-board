@@ -219,36 +219,34 @@ const Contacts: React.FC = () => {
               </div>
             </div>
             {/* Buttons */}
-            <div className="flex flex-col md:flex-row md:justify-between">
-              <button
-                type="submit"
-                className={`w-full ${
-                  isEditMode ? 'md:w-1/2' : ''
-                } bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors duration-200 text-lg font-semibold flex items-center justify-center`}
-              >
-                {isEditMode ? (
-                  <>
-                    <FaEdit className="mr-2" />
-                    Update Contact
-                  </>
-                ) : (
-                  <>
-                    <FaPlusCircle className="mr-2" />
-                    Create Contact
-                  </>
-                )}
-              </button>
-              {isEditMode && (
-                <button
-                  type="button"
-                  onClick={handleClearForm}
-                  className="w-full md:w-1/2 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 transition-colors duration-200 text-lg font-semibold mt-2 md:mb-0 md:mr-2 flex items-center justify-center"
-                >
-                  <FaTimes className="mr-2" />
-                  Cancel
-                </button>
-              )}
-            </div>
+            <div className="flex flex-col md:flex-row md:space-x-4">
+  <button
+    type="submit"
+    className="w-full md:w-1/2 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors duration-200 text-lg font-semibold flex items-center justify-center"
+  >
+    {isEditMode ? (
+      <>
+        <FaEdit className="mr-2" />
+        Update Contact
+      </>
+    ) : (
+      <>
+        <FaPlusCircle className="mr-2" />
+        Create Contact
+      </>
+    )}
+  </button>
+  {isEditMode && (
+    <button
+      type="button"
+      onClick={handleClearForm}
+      className="w-full md:w-1/2 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 transition-colors duration-200 text-lg font-semibold flex items-center justify-center mt-2 md:mt-0"
+    >
+      <FaTimes className="mr-2" />
+      Cancel
+    </button>
+  )}
+</div>
           </form>
         </div>
         {/* Contacts List Section */}
