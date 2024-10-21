@@ -1,19 +1,29 @@
 // src/components/CreateTask.tsx
 import React, { useState, useContext, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, addDoc, Timestamp, query, where, getDocs } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  Timestamp,
+  query,
+  where,
+  getDocs,
+} from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import { Contact } from '../types';
 import { FirebaseError } from 'firebase/app';
 
-
 const CreateTask: React.FC = () => {
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
-  const [priority, setPriority] = useState<'Low' | 'Normal' | 'Urgent'>('Normal');
-  const [assignedTo, setAssignedTo] = useState<string>('');
+  const [priority, setPriority] = useState<'Low' | 'Normal' | 'Urgent'>(
+    'Normal'
+  );
+  const [assignedTo, setAssignedTo] = useState<string[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [category, setCategory] = useState<string>('');
+  const [categories, setCategories] = useState<string[]>([]);
   const [error, setError] = useState<string>('');
   const navigate = useNavigate();
   const { currentUser } = useContext(AuthContext);
@@ -23,9 +33,12 @@ const CreateTask: React.FC = () => {
       if (currentUser) {
         try {
           const contactsRef = collection(db, 'contacts');
-          const q = query(contactsRef, where('userId', '==', currentUser.uid));
+          const q = query(
+            contactsRef,
+            where('userId', '==', currentUser.uid)
+          );
           const querySnapshot = await getDocs(q);
-          const contactsData = querySnapshot.docs.map(doc => ({
+          const contactsData = querySnapshot.docs.map((doc) => ({
             id: doc.id,
             ...(doc.data() as Contact),
           }));
@@ -36,46 +49,90 @@ const CreateTask: React.FC = () => {
       }
     };
 
+    const fetchCategories = async () => {
+      if (currentUser) {
+        try {
+          const tasksRef = collection(db, 'tasks');
+          const q = query(
+            tasksRef,
+            where('userId', '==', currentUser.uid)
+          );
+          const querySnapshot = await getDocs(q);
+          const categoriesSet = new Set<string>();
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.category) {
+              categoriesSet.add(data.category);
+            }
+          });
+          setCategories(Array.from(categoriesSet));
+        } catch (err) {
+          console.error('Error fetching categories:', err);
+        }
+      }
+    };
+
     fetchContacts();
+    fetchCategories();
   }, [currentUser]);
 
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-  
+
     if (!currentUser) {
       setError('You must be logged in to create a task.');
       return;
     }
-  
-    if (title.trim() === '' || description.trim() === '' || assignedTo.trim() === '') {
-      setError('Title, Description, and Assigned To are required.');
+
+    if (
+      title.trim() === '' ||
+      description.trim() === '' ||
+      assignedTo.length === 0 ||
+      category.trim() === ''
+    ) {
+      setError(
+        'Title, Description, Assigned To, and Category are required.'
+      );
       return;
     }
-  
+
     try {
       await addDoc(collection(db, 'tasks'), {
         title,
         description,
         priority,
         assignedTo,
+        category,
         createdAt: Timestamp.fromDate(new Date()),
         userId: currentUser.uid,
       });
       // Redirect to TaskBoard or another page after successful creation
       navigate('/dashboard');
-    } catch (err: unknown) {  // Replace 'any' with 'unknown'
+    } catch (err: unknown) {
       console.error('Error adding task:', err);
-  
-      // Type checking using type guards
+
       if (err instanceof FirebaseError) {
-        setError(err.message);  // Firebase-specific error message
+        setError(err.message);
       } else if (err instanceof Error) {
-        setError(err.message);  // General JavaScript error message
+        setError(err.message);
       } else {
         setError('Failed to create task. Please try again.');
       }
     }
+  };
+
+  const handleAssignedToChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const options = e.target.options;
+    const selectedContacts: string[] = [];
+    for (let i = 0; i < options.length; i++) {
+      if (options[i].selected) {
+        selectedContacts.push(options[i].value);
+      }
+    }
+    setAssignedTo(selectedContacts);
   };
 
   return (
@@ -86,9 +143,7 @@ const CreateTask: React.FC = () => {
       >
         <h2 className="text-2xl mb-4 text-center">Create New Task</h2>
         {error && (
-          <div className="mb-4 text-red-500 text-sm">
-            {error}
-          </div>
+          <div className="mb-4 text-red-500 text-sm">{error}</div>
         )}
         <div className="mb-4">
           <label className="block text-gray-700">Title</label>
@@ -115,25 +170,47 @@ const CreateTask: React.FC = () => {
         <div className="mb-4">
           <label className="block text-gray-700">Assigned To</label>
           <select
+            multiple
             required
             className="w-full px-3 py-2 border rounded mt-1"
             value={assignedTo}
-            onChange={(e) => setAssignedTo(e.target.value)}
+            onChange={handleAssignedToChange}
           >
-            <option value="">Select a contact</option>
-            {contacts.map(contact => (
+            {contacts.map((contact) => (
               <option key={contact.id} value={contact.id}>
                 {contact.name} ({contact.email})
               </option>
             ))}
           </select>
+          <p className="text-sm text-gray-500 mt-1">
+            Hold down the Ctrl (Windows) or Command (Mac) key to select
+            multiple contacts.
+          </p>
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700">Category</label>
+          <input
+            list="category-list"
+            required
+            className="w-full px-3 py-2 border rounded mt-1"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            placeholder="Enter or select a category"
+          />
+          <datalist id="category-list">
+            {categories.map((cat, index) => (
+              <option key={index} value={cat} />
+            ))}
+          </datalist>
         </div>
         <div className="mb-6">
           <label className="block text-gray-700">Priority</label>
           <select
             className="w-full px-3 py-2 border rounded mt-1"
             value={priority}
-            onChange={(e) => setPriority(e.target.value as 'Low' | 'Normal' | 'Urgent')}
+            onChange={(e) =>
+              setPriority(e.target.value as 'Low' | 'Normal' | 'Urgent')
+            }
           >
             <option value="Low">Low</option>
             <option value="Normal">Normal</option>

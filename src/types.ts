@@ -9,6 +9,7 @@ export interface Task {
   createdAt: Timestamp;
   userId: string;
   assignedTo: string; // Contact ID
+  category: string;
 }
 
 export interface Contact {
