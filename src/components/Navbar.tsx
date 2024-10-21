@@ -91,8 +91,8 @@ const Navbar: React.FC = () => {
                 Contacts
               </Link>
               <span className="text-white flex items-center">
-                <FaUserCircle className="mr-2" />
-                {currentUser.email}
+                <FaUserCircle className="mr-2" size={30}/>
+                {currentUser.email?.slice(0,1)}
               </span>
               <button
                 onClick={handleLogout}

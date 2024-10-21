@@ -1,4 +1,5 @@
 // src/components/Login.tsx
+
 import React, { useState } from 'react';
 import { auth } from '../firebase';
 import {
@@ -9,7 +10,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { FirebaseError } from 'firebase/app';
 import { z } from 'zod';
 import { ZodError } from 'zod';
-import { FaUser, FaLock, FaEnvelope, FaTimes } from 'react-icons/fa';
+import { FaLock, FaEnvelope, } from 'react-icons/fa';
+import Modal from './Modal'; // Ensure this path is correct based on your project structure
 
 const Login: React.FC = () => {
   // State variables
@@ -113,92 +115,85 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-100 to-purple-100 p-4">
-    {/* Login Form */}
-    <form
-      onSubmit={handleLogin}
-      className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md"
-    >
-      <h2 className="text-3xl md:text-4xl mb-6 text-center font-bold text-blue-700 flex items-center justify-center">
-        <FaUser className="mr-3 text-blue-700 text-4xl" /> Log In
-      </h2>
-      {error && <div className="mb-4 text-red-500 text-md">{error}</div>}
-      <div className="mb-6">
-        <label className="block text-gray-700 text-lg font-medium mb-2">Email</label>
-        <div className="relative">
-          <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input
-            type="email"
-            required
-            className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-          />
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-100 to-purple-100 p-4 ">
+      {/* Login Form */}
+      <form
+        onSubmit={handleLogin}
+        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md min-w-[35vw]"
+      >
+        <h2 className="text-3xl md:text-4xl mb-6 text-center font-bold  flex items-center justify-center">
+          Log In
+        </h2>
+        {error && <div className="mb-4 text-red-500 text-md">{error}</div>}
+        <div className="mb-6">
+          <label className="block text-gray-700 text-lg font-medium mb-2">Email</label>
+          <div className="relative">
+            <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="email"
+              required
+              className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+            />
+          </div>
         </div>
-      </div>
-      <div className="mb-6">
-        <label className="block text-gray-700 text-lg font-medium mb-2">Password</label>
-        <div className="relative">
-          <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input
-            type="password"
-            required
-            className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="********"
-          />
+        <div className="mb-6">
+          <label className="block text-gray-700 text-lg font-medium mb-2">Password</label>
+          <div className="relative">
+            <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="password"
+              required
+              className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+            />
+          </div>
         </div>
-      </div>
-      <div className="mb-6 text-right">
+        <div className="mb-6 text-right">
+          <button
+            type="button"
+            onClick={openResetModal}
+            className="text-blue-600 hover:text-blue-800 hover:underline text-md font-medium"
+          >
+            Forgot Password?
+          </button>
+        </div>
+        <button
+          type="submit"
+          className="w-full bg-gray-700 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 text-lg font-semibold mb-4 hover:shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]"
+        >
+          Log In
+        </button>
         <button
           type="button"
-          onClick={openResetModal}
-          className="text-blue-600 hover:text-blue-800 hover:underline text-md font-medium"
+          onClick={handleGuestLogin}
+          className="w-full outline-[1px] border border-gray-700 py-3 rounded-lg hover:outline-0 hover:text-blue-700 transition duration-200 text-lg font-semibold hover:shadow-[1px_1px_1px_2px_#2b6cb0]"
         >
-          Forgot Password?
+          Continue as Guest
         </button>
-      </div>
-      <button
-        type="submit"
-        className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 text-lg font-semibold mb-4"
-      >
-        Log In
-      </button>
-      <button
-        type="button"
-        onClick={handleGuestLogin}
-        className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition duration-200 text-lg font-semibold"
-      >
-        Continue as Guest
-      </button>
-      <p className="mt-6 text-center text-md">
-        Don't have an account?{' '}
-        <Link to="/signup" className="text-blue-600 hover:text-blue-800 font-medium hover:underline">
-          Sign Up
-        </Link>
-      </p>
-    </form>
+        <p className="mt-6 text-center text-md">
+          Don't have an account?{' '}
+          <Link to="/signup" className="text-blue-600 hover:text-blue-800 font-medium hover:underline">
+            Sign Up
+          </Link>
+        </p>
+      </form>
 
-    {/* Password Reset Modal */}
-    {isResetModalOpen && (
-      <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md relative">
-          <button
-            onClick={closeResetModal}
-            className="absolute top-4 right-4 text-gray-600 hover:text-gray-800"
-          >
-            <FaTimes className="text-2xl" />
-          </button>
-          <h2 className="text-3xl md:text-4xl mb-6 text-center font-bold text-blue-700">
-            Reset Password
-          </h2>
-          {error && <div className="mb-4 text-red-500 text-md">{error}</div>}
-          {resetMessage && (
-            <div className="mb-4 text-green-500 text-md">{resetMessage}</div>
-          )}
-          <form onSubmit={handlePasswordReset}>
+      {/* Password Reset Modal */}
+      {isResetModalOpen && (
+        <Modal onClose={closeResetModal}>
+          <form onSubmit={handlePasswordReset} className="bg-white p-8 rounded-lg">
+            <h2 className="text-3xl mb-6 text-center font-bold text-blue-700 flex items-center justify-center">
+              Reset Password
+            </h2>
+            {error && <div className="mb-4 text-red-500 text-md">{error}</div>}
+            {resetMessage && (
+              <div className="mb-4 text-green-500 text-md">{resetMessage}</div>
+            )}
             <div className="mb-6">
               <label className="block text-gray-700 text-lg font-medium mb-2">Email</label>
               <div className="relative">
@@ -209,28 +204,27 @@ const Login: React.FC = () => {
                   className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder="Email"
                 />
               </div>
             </div>
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 text-lg font-semibold mb-4"
+              className="w-full bg-gray-700 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 text-lg font-semibold mb-4 hover:shadow-[1px_1px_1px_2px_#2b6cb0]"
             >
               Send Reset Email
             </button>
             <button
               type="button"
               onClick={closeResetModal}
-              className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition duration-200 text-lg font-semibold"
+              className="w-full border-gray-700 border-[1px] hover:text-blue-700 py-3 rounded-lg hover:border-blue-700 transition duration-200 text-lg font-semibold hover:shadow-[1px_1px_1px_2px_#2b6cb0]"
             >
               Cancel
             </button>
           </form>
-        </div>
-      </div>
-    )}
-  </div>
+        </Modal>
+      )}
+    </div>
   );
 };
 
