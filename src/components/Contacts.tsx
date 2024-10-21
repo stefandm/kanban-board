@@ -1,4 +1,5 @@
 // src/components/Contacts.tsx
+
 import React, { useState, useContext, useEffect } from 'react';
 import {
   collection,
@@ -15,6 +16,15 @@ import { db } from '../firebase';
 import { AuthContext } from '../contexts/AuthContext';
 import { Contact } from '../types';
 import { FirebaseError } from 'firebase/app';
+import {
+  FaUser,
+  FaEnvelope,
+  FaPhone,
+  FaPlusCircle,
+  FaEdit,
+  FaTrash,
+  FaTimes,
+} from 'react-icons/fa';
 
 const Contacts: React.FC = () => {
   const [name, setName] = useState<string>('');
@@ -67,7 +77,7 @@ const Contacts: React.FC = () => {
         name,
         email,
         phoneNumber,
-        createdAt: Timestamp.fromDate(new Date()), // Store as Timestamp
+        createdAt: Timestamp.fromDate(new Date()),
         userId: currentUser.uid,
       };
 
@@ -75,13 +85,11 @@ const Contacts: React.FC = () => {
         // Update existing contact
         const contactRef = doc(db, 'contacts', editContactId);
         await updateDoc(contactRef, newContact);
-        // No need to manually update contacts state; onSnapshot will handle it
         setIsEditMode(false);
         setEditContactId(null);
       } else {
         // Add new contact
         await addDoc(collection(db, 'contacts'), newContact);
-        // No need to manually update contacts state; onSnapshot will handle it
       }
 
       // Clear form fields
@@ -119,17 +127,27 @@ const Contacts: React.FC = () => {
       try {
         const contactRef = doc(db, 'contacts', contactId);
         await deleteDoc(contactRef);
-        // No need to manually update contacts state; onSnapshot will handle it
       } catch (err) {
         console.error('Error deleting contact:', err);
       }
     }
   };
 
+  const handleClearForm = () => {
+    setName('');
+    setEmail('');
+    setPhoneNumber('');
+    setIsEditMode(false);
+    setEditContactId(null);
+    setError('');
+  };
+
   if (!currentUser) {
     return (
       <div className="container mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-4">Please log in to manage your contacts.</h1>
+        <h1 className="text-3xl font-bold mb-4 text-center text-blue-700">
+          Please log in to manage your contacts.
+        </h1>
       </div>
     );
   }
@@ -138,101 +156,144 @@ const Contacts: React.FC = () => {
     <div className="container mx-auto p-6">
       <div className="flex flex-col md:flex-row md:space-x-6">
         {/* Form Section */}
-        <div className="md:w-1/2">
+        <div className="md:w-1/2 mb-6 md:mb-0">
           <form
             onSubmit={handleCreateContact}
-            className="bg-white p-6 rounded shadow-md"
+            className="bg-white p-8 rounded-lg shadow-lg"
           >
-            <h2 className="text-2xl mb-4 text-center">
+            <h2 className="text-3xl md:text-4xl mb-6 text-center font-bold text-blue-700 flex items-center justify-center">
+              <FaUser className="mr-3 text-blue-700 text-4xl" />
               {isEditMode ? 'Edit Contact' : 'Create New Contact'}
             </h2>
-            {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
-            <div className="mb-4">
-              <label className="block text-gray-700">Name</label>
-              <input
-                type="text"
-                required
-                className="w-full px-3 py-2 border rounded mt-1"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Full Name"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Email</label>
-              <input
-                type="email"
-                required
-                className="w-full px-3 py-2 border rounded mt-1"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-              />
-            </div>
+            {error && <div className="mb-6 text-red-500 text-md">{error}</div>}
+            {/* Name */}
             <div className="mb-6">
-              <label className="block text-gray-700">Phone Number</label>
-              <input
-                type="tel"
-                required
-                pattern="[0-9]{10}"
-                className="w-full px-3 py-2 border rounded mt-1"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="1234567890"
-              />
+              <label className="block text-gray-700 text-lg font-medium mb-2">
+                Name
+              </label>
+              <div className="relative">
+                <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  required
+                  className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Full Name"
+                />
+              </div>
             </div>
-            <button
-              type="submit"
-              className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
-            >
-              {isEditMode ? 'Update Contact' : 'Create Contact'}
-            </button>
-            {isEditMode && (
+            {/* Email */}
+            <div className="mb-6">
+              <label className="block text-gray-700 text-lg font-medium mb-2">
+                Email
+              </label>
+              <div className="relative">
+                <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="email"
+                  required
+                  className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                />
+              </div>
+            </div>
+            {/* Phone Number */}
+            <div className="mb-6">
+              <label className="block text-gray-700 text-lg font-medium mb-2">
+                Phone Number
+              </label>
+              <div className="relative">
+                <FaPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="tel"
+                  required
+                  pattern="[0-9]{10}"
+                  className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="1234567890"
+                />
+              </div>
+            </div>
+            {/* Buttons */}
+            <div className="flex flex-col md:flex-row md:justify-between">
               <button
-                type="button"
-                onClick={() => {
-                  // Reset form
-                  setName('');
-                  setEmail('');
-                  setPhoneNumber('');
-                  setIsEditMode(false);
-                  setEditContactId(null);
-                }}
-                className="w-full bg-gray-500 text-white py-2 rounded mt-2 hover:bg-gray-600"
+                type="submit"
+                className={`w-full ${
+                  isEditMode ? 'md:w-1/2' : ''
+                } bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors duration-200 text-lg font-semibold flex items-center justify-center`}
               >
-                Cancel
+                {isEditMode ? (
+                  <>
+                    <FaEdit className="mr-2" />
+                    Update Contact
+                  </>
+                ) : (
+                  <>
+                    <FaPlusCircle className="mr-2" />
+                    Create Contact
+                  </>
+                )}
               </button>
-            )}
+              {isEditMode && (
+                <button
+                  type="button"
+                  onClick={handleClearForm}
+                  className="w-full md:w-1/2 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 transition-colors duration-200 text-lg font-semibold mt-2 md:mb-0 md:mr-2 flex items-center justify-center"
+                >
+                  <FaTimes className="mr-2" />
+                  Cancel
+                </button>
+              )}
+            </div>
           </form>
         </div>
         {/* Contacts List Section */}
-        <div className="md:w-1/2 mt-6 md:mt-0">
-          <h2 className="text-2xl mb-4 text-center">Your Contacts</h2>
+        <div className="md:w-1/2">
+          <h2 className="text-3xl md:text-4xl mb-6 text-center font-bold text-blue-700">
+            Your Contacts
+          </h2>
           {contacts.length === 0 ? (
-            <p className="text-gray-700 text-center">No contacts available.</p>
+            <p className="text-gray-700 text-center text-lg">
+              No contacts available.
+            </p>
           ) : (
             <div className="space-y-4">
               {contacts.map((contact) => (
                 <div
                   key={contact.id}
-                  className="bg-white p-4 rounded shadow flex justify-between items-center"
+                  className="bg-white p-6 rounded-lg shadow-md flex justify-between items-center"
                 >
                   <div>
-                    <p className="text-lg font-semibold">{contact.name}</p>
-                    <p className="text-gray-600">{contact.email}</p>
-                    <p className="text-gray-600">{contact.phoneNumber}</p>
+                    <p className="text-xl font-semibold flex items-center text-gray-800">
+                      <FaUser className="mr-2 text-blue-600" />
+                      {contact.name}
+                    </p>
+                    <p className="text-gray-700 flex items-center mt-2">
+                      <FaEnvelope className="mr-2 text-green-600" />
+                      {contact.email}
+                    </p>
+                    <p className="text-gray-700 flex items-center mt-1">
+                      <FaPhone className="mr-2 text-yellow-600" />
+                      {contact.phoneNumber}
+                    </p>
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex flex-col md:flex-row gap-2 ">
                     <button
                       onClick={() => handleEditContact(contact)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                      className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center"
                     >
+                      <FaEdit className="mr-2" />
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeleteContact(contact.id!)}
-                      className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200 flex items-center"
                     >
+                      <FaTrash className="mr-2" />
                       Remove
                     </button>
                   </div>

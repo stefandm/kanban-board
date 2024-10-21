@@ -1,25 +1,49 @@
 // src/components/Login.tsx
 import React, { useState } from 'react';
 import { auth } from '../firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from 'firebase/auth';
+import { useNavigate, Link } from 'react-router-dom';
 import { FirebaseError } from 'firebase/app';
+import { z } from 'zod';
+import { ZodError } from 'zod';
+import { FaUser, FaLock, FaEnvelope, FaTimes } from 'react-icons/fa';
 
 const Login: React.FC = () => {
+  // State variables
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const [isResetModalOpen, setIsResetModalOpen] = useState<boolean>(false);
+  const [resetEmail, setResetEmail] = useState<string>('');
+  const [resetMessage, setResetMessage] = useState<string>('');
   const navigate = useNavigate();
 
+  // Zod schemas
+  const emailSchema = z.string().email({ message: 'Invalid email address' });
+  const passwordSchema = z.string().min(6, { message: 'Password must be at least 6 characters' });
+
+  // Handle login form submission
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      // Validate inputs using Zod
+      const validatedEmail = emailSchema.parse(email);
+      const validatedPassword = passwordSchema.parse(password);
+
+      await signInWithEmailAndPassword(auth, validatedEmail, validatedPassword);
       // Redirect to dashboard or home page after successful login
       navigate('/summary');
-    } catch (err: unknown) { // Use 'unknown' to safely handle different error types
-      if (err instanceof FirebaseError) {
+    } catch (err) {
+      if (err instanceof ZodError) {
+        // Collect all validation errors
+        const validationErrors = err.errors.map((e) => e.message).join(' ');
+        setError(validationErrors);
+      } else if (err instanceof FirebaseError) {
         setError(err.message);
       } else if (err instanceof Error) {
         setError(err.message);
@@ -29,16 +53,17 @@ const Login: React.FC = () => {
     }
   };
 
+  // Handle guest login
   const handleGuestLogin = async () => {
     setError('');
     try {
       // Predefined guest credentials
-      const guestEmail = 'guest@example.com';
+      const guestEmail = 'guest@gmail.com';
       const guestPassword = 'guestpassword';
       await signInWithEmailAndPassword(auth, guestEmail, guestPassword);
       // Redirect to dashboard or home page after successful login
       navigate('/summary');
-    } catch (err: unknown) { // Use 'unknown' here as well
+    } catch (err: unknown) {
       if (err instanceof FirebaseError) {
         setError(err.message);
       } else if (err instanceof Error) {
@@ -49,61 +74,163 @@ const Login: React.FC = () => {
     }
   };
 
+  // Open password reset modal
+  const openResetModal = () => {
+    setResetEmail('');
+    setResetMessage('');
+    setIsResetModalOpen(true);
+  };
+
+  // Close password reset modal
+  const closeResetModal = () => {
+    setIsResetModalOpen(false);
+  };
+
+  // Handle password reset
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetMessage('');
+    setError('');
+
+    try {
+      // Validate email using Zod
+      const validatedEmail = emailSchema.parse(resetEmail);
+
+      await sendPasswordResetEmail(auth, validatedEmail);
+      setResetMessage('Password reset email sent. Please check your inbox.');
+    } catch (err) {
+      if (err instanceof ZodError) {
+        const validationErrors = err.errors.map((e) => e.message).join(' ');
+        setError(validationErrors);
+      } else if (err instanceof FirebaseError) {
+        setError(err.message);
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred.');
+      }
+    }
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white p-6 rounded shadow-md w-full max-w-sm"
-      >
-        <h2 className="text-2xl mb-4 text-center">Log In</h2>
-        {error && (
-          <div className="mb-4 text-red-500 text-sm">
-            {error}
-          </div>
-        )}
-        <div className="mb-4">
-          <label className="block text-gray-700">Email</label>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-100 to-purple-100 p-4">
+    {/* Login Form */}
+    <form
+      onSubmit={handleLogin}
+      className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md"
+    >
+      <h2 className="text-3xl md:text-4xl mb-6 text-center font-bold text-blue-700 flex items-center justify-center">
+        <FaUser className="mr-3 text-blue-700 text-4xl" /> Log In
+      </h2>
+      {error && <div className="mb-4 text-red-500 text-md">{error}</div>}
+      <div className="mb-6">
+        <label className="block text-gray-700 text-lg font-medium mb-2">Email</label>
+        <div className="relative">
+          <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="email"
             required
-            className="w-full px-3 py-2 border rounded mt-1"
+            className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
           />
         </div>
-        <div className="mb-6">
-          <label className="block text-gray-700">Password</label>
+      </div>
+      <div className="mb-6">
+        <label className="block text-gray-700 text-lg font-medium mb-2">Password</label>
+        <div className="relative">
+          <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="password"
             required
-            className="w-full px-3 py-2 border rounded mt-1"
+            className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="********"
           />
         </div>
-        <button
-          type="submit"
-          className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 mb-4"
-        >
-          Log In
-        </button>
+      </div>
+      <div className="mb-6 text-right">
         <button
           type="button"
-          onClick={handleGuestLogin}
-          className="w-full bg-gray-500 text-white py-2 rounded hover:bg-gray-600"
+          onClick={openResetModal}
+          className="text-blue-600 hover:text-blue-800 hover:underline text-md font-medium"
         >
-          Continue as Guest
+          Forgot Password?
         </button>
-        <p className="mt-4 text-center text-sm">
-          Don't have an account?{' '}
-          <a href="/signup" className="text-blue-500 hover:underline">
-            Sign Up
-          </a>
-        </p>
-      </form>
-    </div>
+      </div>
+      <button
+        type="submit"
+        className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 text-lg font-semibold mb-4"
+      >
+        Log In
+      </button>
+      <button
+        type="button"
+        onClick={handleGuestLogin}
+        className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition duration-200 text-lg font-semibold"
+      >
+        Continue as Guest
+      </button>
+      <p className="mt-6 text-center text-md">
+        Don't have an account?{' '}
+        <Link to="/signup" className="text-blue-600 hover:text-blue-800 font-medium hover:underline">
+          Sign Up
+        </Link>
+      </p>
+    </form>
+
+    {/* Password Reset Modal */}
+    {isResetModalOpen && (
+      <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md relative">
+          <button
+            onClick={closeResetModal}
+            className="absolute top-4 right-4 text-gray-600 hover:text-gray-800"
+          >
+            <FaTimes className="text-2xl" />
+          </button>
+          <h2 className="text-3xl md:text-4xl mb-6 text-center font-bold text-blue-700">
+            Reset Password
+          </h2>
+          {error && <div className="mb-4 text-red-500 text-md">{error}</div>}
+          {resetMessage && (
+            <div className="mb-4 text-green-500 text-md">{resetMessage}</div>
+          )}
+          <form onSubmit={handlePasswordReset}>
+            <div className="mb-6">
+              <label className="block text-gray-700 text-lg font-medium mb-2">Email</label>
+              <div className="relative">
+                <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="email"
+                  required
+                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder="you@example.com"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 text-lg font-semibold mb-4"
+            >
+              Send Reset Email
+            </button>
+            <button
+              type="button"
+              onClick={closeResetModal}
+              className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition duration-200 text-lg font-semibold"
+            >
+              Cancel
+            </button>
+          </form>
+        </div>
+      </div>
+    )}
+  </div>
   );
 };
 
