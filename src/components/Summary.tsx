@@ -76,7 +76,7 @@ const Summary: React.FC = () => {
   const linkItemsClass = "text-3xl md:text-5xl font-bold "
 
   return (
-    <div className="container mx-auto py-6 ">
+    <div className="container mx-auto py-6 w-full ">
     <h1 className="text-4xl md:text-5xl font-bold mt-6 mb-10 text-center">Summary</h1>
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -128,7 +128,7 @@ const Summary: React.FC = () => {
       </div>
 
       {/* Urgent Tasks */}
-      <div className="bg-white rounded-lg  p-8">
+      <div className="bg-white rounded-lg  p-8 ">
         <h2 className="text-3xl md:text-4xl font-semibold mb-8 text-red-700 flex items-center">
           <FaExclamationTriangle className="mr-4  text-4xl md:text-5xl" /> Urgent Tasks
         </h2>

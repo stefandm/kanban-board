@@ -204,7 +204,7 @@ const TaskBoard: React.FC = () => {
   }
 
   return (
-    <div className="p-6 bg-gradient-to-r from-blue-100 to-purple-100 min-h-screen">
+    <div className="p-6 min-h-screen">
       <h1 className="text-3xl md:text-4xl mb-6 text-center font-bold text-blue-700">
         Task Board
       </h1>
@@ -217,7 +217,7 @@ const TaskBoard: React.FC = () => {
           {tasks.map((task) => (
             <div
               key={task.id}
-              className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 flex flex-col justify-evenly "
+              className="bg-white p-6 rounded-lg shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] hover:shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] transition-shadow duration-200 flex flex-col justify-evenly "
             >
               <div className=" text-xl w-fit white text-white mb-2 px-2  rounded-lg bg-blue-600">
                 <strong> {task.category}</strong>

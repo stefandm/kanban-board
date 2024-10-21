@@ -119,7 +119,7 @@ const Login: React.FC = () => {
       {/* Login Form */}
       <form
         onSubmit={handleLogin}
-        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md min-w-[35vw]"
+        className="bg-white p-8 rounded-lg shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] w-full max-w-md min-w-[35vw]"
       >
         <h2 className="text-3xl md:text-4xl mb-6 text-center font-bold  flex items-center justify-center">
           Log In
