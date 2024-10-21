@@ -33,10 +33,10 @@ const Navbar: React.FC = () => {
               Create Task
             </Link>
             <Link
-              to="/create-contact"
+              to="/contacts"
               className="bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600 mr-4"
             >
-              Create Contact
+              Contacts
             </Link>
             <span className="text-white mr-4">
               {currentUser.email}

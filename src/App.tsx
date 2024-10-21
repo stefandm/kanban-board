@@ -6,7 +6,7 @@ import Login from './components/Login';
 import TaskBoard from './components/TaskBoard';
 import Navbar from './components/Navbar';
 import CreateTask from './components/CreateTask';
-import CreateContact from './components/CreateContact'; // Import CreateContact
+import Contacts from './components/Contacts'; // Import CreateContact
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -33,10 +33,10 @@ const App: React.FC = () => {
             }
           />
           <Route
-            path="/create-contact"
+            path="/contacts"
             element={
               <ProtectedRoute>
-                <CreateContact />
+                <Contacts />
               </ProtectedRoute>
             }
           />
