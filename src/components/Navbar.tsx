@@ -132,7 +132,7 @@ const Navbar: React.FC = () => {
                 <Link
                   to="/summary"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 transition-colors duration-200"
+                  className="flex items-center bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
                 >
                   <FaTasks className="mr-2" />
                   Summary
@@ -140,7 +140,7 @@ const Navbar: React.FC = () => {
                 <Link
                   to="/dashboard"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 mt-2"
+                  className="flex items-center bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 mt-2"
                 >
                   <FaTachometerAlt className="mr-2" />
                   Dashboard
@@ -148,7 +148,7 @@ const Navbar: React.FC = () => {
                 <Link
                   to="/create-task"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center bg-yellow-500 text-white px-3 py-2 rounded-lg hover:bg-yellow-600 transition-colors duration-200 mt-2"
+                  className="flex items-center bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 mt-2"
                 >
                   <FaPlusCircle className="mr-2" />
                   Create Task
@@ -156,7 +156,7 @@ const Navbar: React.FC = () => {
                 <Link
                   to="/contacts"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center bg-purple-500 text-white px-3 py-2 rounded-lg hover:bg-purple-600 transition-colors duration-200 mt-2"
+                  className="flex items-center bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 mt-2"
                 >
                   <FaAddressBook className="mr-2" />
                   Contacts
@@ -170,7 +170,7 @@ const Navbar: React.FC = () => {
                     handleLogout();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="flex items-center bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200 mt-2"
+                  className="flex items-center bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 mt-2"
                 >
                   <FaSignOutAlt className="mr-2" />
                   Logout
