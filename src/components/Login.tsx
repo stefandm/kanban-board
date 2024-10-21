@@ -187,7 +187,7 @@ const Login: React.FC = () => {
       {isResetModalOpen && (
         <Modal onClose={closeResetModal}>
           <form onSubmit={handlePasswordReset} className="bg-white p-8 rounded-lg">
-            <h2 className="text-3xl mb-6 text-center font-bold text-blue-700 flex items-center justify-center">
+            <h2 className="text-3xl mb-6 text-center font-bold flex items-center justify-center">
               Reset Password
             </h2>
             {error && <div className="mb-4 text-red-500 text-md">{error}</div>}

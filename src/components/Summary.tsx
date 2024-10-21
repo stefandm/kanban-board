@@ -140,11 +140,11 @@ const Summary: React.FC = () => {
               <li key={task.id} className="mb-6">
                 <Link
                   to="/dashboard"
-                  className="block  border-l-4 border-red-600  rounded-xl p-6 hover:bg-gray-700 hover:text-white transition-colors duration-200  shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]"
+                  className="block  border-l-4 border-red-600  rounded-xl p-6 hover:bg-red-400 hover:text-white transition-colors duration-200  shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]"
                 >
                   <div className="flex items-center justify-between">
                     <p className="font-semibold  text-xl">{task.title}</p>
-                    <span className="text-lg text-red-500">
+                    <span className="text-lg ">
                       Due by{' '}
                       {task.dueDate instanceof Timestamp
                         ? task.dueDate.toDate().toLocaleDateString()
