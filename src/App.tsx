@@ -14,7 +14,7 @@ import Summary from './components/Summary';
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <Router>
+      <Router basename="/kanban-board">
         <Navbar />
         <Routes>
           <Route
