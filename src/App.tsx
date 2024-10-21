@@ -1,6 +1,6 @@
 // src/App.tsx
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Signup from './components/Signup';
 import Login from './components/Login';
 import TaskBoard from './components/TaskBoard';
@@ -14,7 +14,7 @@ import Summary from './components/Summary';
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <Router basename="/kanban-board">
+      <Router basename="/kanban-board"> {/* Set basename if needed */}
         <Navbar />
         <Routes>
           <Route
