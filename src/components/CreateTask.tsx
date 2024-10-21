@@ -17,13 +17,14 @@ import { FirebaseError } from 'firebase/app';
 const CreateTask: React.FC = () => {
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
-  const [priority, setPriority] = useState<'Low' | 'Normal' | 'Urgent'>(
-    'Normal'
-  );
+  const [priority, setPriority] = useState<'Low' | 'Normal' | 'Urgent'>('Normal');
   const [assignedTo, setAssignedTo] = useState<string[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [category, setCategory] = useState<string>('');
   const [categories, setCategories] = useState<string[]>([]);
+  const [dueDate, setDueDate] = useState<string>('');
+  const [subtaskInput, setSubtaskInput] = useState<string>(''); // Input for new subtask
+  const [subtasks, setSubtasks] = useState<string[]>([]); // List of subtasks
   const [error, setError] = useState<string>('');
   const navigate = useNavigate();
   const { currentUser } = useContext(AuthContext);
@@ -33,10 +34,7 @@ const CreateTask: React.FC = () => {
       if (currentUser) {
         try {
           const contactsRef = collection(db, 'contacts');
-          const q = query(
-            contactsRef,
-            where('userId', '==', currentUser.uid)
-          );
+          const q = query(contactsRef, where('userId', '==', currentUser.uid));
           const querySnapshot = await getDocs(q);
           const contactsData = querySnapshot.docs.map((doc) => ({
             id: doc.id,
@@ -53,10 +51,7 @@ const CreateTask: React.FC = () => {
       if (currentUser) {
         try {
           const tasksRef = collection(db, 'tasks');
-          const q = query(
-            tasksRef,
-            where('userId', '==', currentUser.uid)
-          );
+          const q = query(tasksRef, where('userId', '==', currentUser.uid));
           const querySnapshot = await getDocs(q);
           const categoriesSet = new Set<string>();
           querySnapshot.forEach((doc) => {
@@ -89,10 +84,11 @@ const CreateTask: React.FC = () => {
       title.trim() === '' ||
       description.trim() === '' ||
       assignedTo.length === 0 ||
-      category.trim() === ''
+      category.trim() === '' ||
+      dueDate.trim() === ''
     ) {
       setError(
-        'Title, Description, Assigned To, and Category are required.'
+        'Title, Description, Assigned To, Category, and Due Date are required.'
       );
       return;
     }
@@ -104,8 +100,11 @@ const CreateTask: React.FC = () => {
         priority,
         assignedTo,
         category,
+        dueDate: Timestamp.fromDate(new Date(dueDate)),
         createdAt: Timestamp.fromDate(new Date()),
         userId: currentUser.uid,
+        subtasks, // Include subtasks array
+        status: 'To do',
       });
       // Redirect to TaskBoard or another page after successful creation
       navigate('/dashboard');
@@ -122,9 +121,7 @@ const CreateTask: React.FC = () => {
     }
   };
 
-  const handleAssignedToChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const handleAssignedToChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const options = e.target.options;
     const selectedContacts: string[] = [];
     for (let i = 0; i < options.length; i++) {
@@ -133,6 +130,18 @@ const CreateTask: React.FC = () => {
       }
     }
     setAssignedTo(selectedContacts);
+  };
+
+  const handleAddSubtask = () => {
+    if (subtaskInput.trim() !== '') {
+      setSubtasks([...subtasks, subtaskInput.trim()]);
+      setSubtaskInput('');
+    }
+  };
+
+  const handleRemoveSubtask = (index: number) => {
+    const newSubtasks = subtasks.filter((_, idx) => idx !== index);
+    setSubtasks(newSubtasks);
   };
 
   return (
@@ -202,6 +211,54 @@ const CreateTask: React.FC = () => {
               <option key={index} value={cat} />
             ))}
           </datalist>
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700">Due Date</label>
+          <input
+            type="date"
+            required
+            className="w-full px-3 py-2 border rounded mt-1"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700">Subtasks</label>
+          <div className="flex">
+            <input
+              type="text"
+              className="w-full px-3 py-2 border rounded-l mt-1"
+              value={subtaskInput}
+              onChange={(e) => setSubtaskInput(e.target.value)}
+              placeholder="Enter a subtask"
+            />
+            <button
+              type="button"
+              onClick={handleAddSubtask}
+              className="bg-blue-500 text-white px-4 py-2 rounded-r mt-1 hover:bg-blue-600"
+            >
+              Add
+            </button>
+          </div>
+          {subtasks.length > 0 && (
+            <ul className="mt-2">
+              {subtasks.map((subtask, index) => (
+                <li
+                  key={index}
+                  className="flex items-center justify-between bg-gray-200 p-2 rounded mt-1"
+                >
+                  <span>{subtask}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSubtask(index)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         <div className="mb-6">
           <label className="block text-gray-700">Priority</label>

@@ -10,6 +10,9 @@ export interface Task {
   userId: string;
   assignedTo: string; // Contact ID
   category: string;
+  dueDate: Date;
+  subtask?: string[];
+  status: string;
 }
 
 export interface Contact {
