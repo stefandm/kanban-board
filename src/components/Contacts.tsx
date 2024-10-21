@@ -1,18 +1,17 @@
-// src/components/CreateContact.tsx
+// src/components/Contacts.tsx
 import React, { useState, useContext, useEffect } from 'react';
-import { db } from '../firebase';
 import {
   collection,
   addDoc,
   Timestamp,
   query,
   where,
-  getDocs,
+  onSnapshot,
   doc,
   updateDoc,
   deleteDoc,
 } from 'firebase/firestore';
-// import { useNavigate } from 'react-router-dom';
+import { db } from '../firebase';
 import { AuthContext } from '../contexts/AuthContext';
 import { Contact } from '../types';
 import { FirebaseError } from 'firebase/app';
@@ -25,28 +24,28 @@ const Contacts: React.FC = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [editContactId, setEditContactId] = useState<string | null>(null);
-  // const navigate = useNavigate();
   const { currentUser } = useContext(AuthContext);
 
   useEffect(() => {
-    const fetchContacts = async () => {
-      if (currentUser) {
-        try {
-          const contactsRef = collection(db, 'contacts');
-          const q = query(contactsRef, where('userId', '==', currentUser.uid));
-          const querySnapshot = await getDocs(q);
-          const contactsData = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...(doc.data() as Contact),
-          }));
-          setContacts(contactsData);
-        } catch (err) {
-          console.error('Error fetching contacts:', err);
-        }
-      }
-    };
+    let unsubscribeContacts: () => void;
 
-    fetchContacts();
+    if (currentUser) {
+      const contactsRef = collection(db, 'contacts');
+      const q = query(contactsRef, where('userId', '==', currentUser.uid));
+
+      unsubscribeContacts = onSnapshot(q, (querySnapshot) => {
+        const contactsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Contact),
+        }));
+        setContacts(contactsData);
+      });
+    }
+
+    // Cleanup function to unsubscribe listener
+    return () => {
+      if (unsubscribeContacts) unsubscribeContacts();
+    };
   }, [currentUser]);
 
   const handleCreateContact = async (e: React.FormEvent) => {
@@ -76,17 +75,13 @@ const Contacts: React.FC = () => {
         // Update existing contact
         const contactRef = doc(db, 'contacts', editContactId);
         await updateDoc(contactRef, newContact);
-        setContacts((prevContacts) =>
-          prevContacts.map((contact) =>
-            contact.id === editContactId ? { id: editContactId, ...newContact } : contact
-          )
-        );
+        // No need to manually update contacts state; onSnapshot will handle it
         setIsEditMode(false);
         setEditContactId(null);
       } else {
         // Add new contact
-        const docRef = await addDoc(collection(db, 'contacts'), newContact);
-        setContacts([...contacts, { id: docRef.id, ...newContact }]);
+        await addDoc(collection(db, 'contacts'), newContact);
+        // No need to manually update contacts state; onSnapshot will handle it
       }
 
       // Clear form fields
@@ -124,13 +119,20 @@ const Contacts: React.FC = () => {
       try {
         const contactRef = doc(db, 'contacts', contactId);
         await deleteDoc(contactRef);
-        // Remove the contact from local state
-        setContacts((prevContacts) => prevContacts.filter((contact) => contact.id !== contactId));
+        // No need to manually update contacts state; onSnapshot will handle it
       } catch (err) {
         console.error('Error deleting contact:', err);
       }
     }
   };
+
+  if (!currentUser) {
+    return (
+      <div className="container mx-auto p-6">
+        <h1 className="text-2xl font-bold mb-4">Please log in to manage your contacts.</h1>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -144,9 +146,7 @@ const Contacts: React.FC = () => {
             <h2 className="text-2xl mb-4 text-center">
               {isEditMode ? 'Edit Contact' : 'Create New Contact'}
             </h2>
-            {error && (
-              <div className="mb-4 text-red-500 text-sm">{error}</div>
-            )}
+            {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
             <div className="mb-4">
               <label className="block text-gray-700">Name</label>
               <input

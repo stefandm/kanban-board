@@ -5,7 +5,7 @@ import {
   collection,
   query,
   where,
-  getDocs,
+  onSnapshot,
   Timestamp,
 } from 'firebase/firestore';
 import { AuthContext } from '../contexts/AuthContext';
@@ -18,47 +18,55 @@ const Summary: React.FC = () => {
   const { currentUser } = useContext(AuthContext);
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      if (currentUser) {
-        try {
-          const tasksRef = collection(db, 'tasks');
-          const q = query(tasksRef, where('userId', '==', currentUser.uid));
-          const querySnapshot = await getDocs(q);
-          const tasksData = querySnapshot.docs.map((doc) => {
-            const data = doc.data();
+    let unsubscribeTasks: () => void;
 
-            // Ensure assignedTo is always an array
-            const assignedToArray: string[] = Array.isArray(data.assignedTo)
-              ? data.assignedTo
-              : [data.assignedTo];
+    if (currentUser) {
+      const tasksRef = collection(db, 'tasks');
+      const q = query(tasksRef, where('userId', '==', currentUser.uid));
 
-            return {
-              id: doc.id,
-              ...(data as Omit<Task, 'assignedTo'>),
-              assignedTo: assignedToArray,
-            } as Task;
-          });
-          setTasks(tasksData);
+      unsubscribeTasks = onSnapshot(q, (querySnapshot) => {
+        const tasksData = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
 
-          // Calculate status counts
-          const counts: { [key: string]: number } = {};
-          tasksData.forEach((task) => {
-            const status = task.status;
-            counts[status] = (counts[status] || 0) + 1;
-          });
-          setStatusCounts(counts);
+          // Ensure assignedTo is always an array
+          const assignedToArray: string[] = Array.isArray(data.assignedTo)
+            ? data.assignedTo
+            : [data.assignedTo];
 
-          // Identify urgent tasks
-          const urgent = tasksData.filter((task) => task.priority === 'Urgent');
-          setUrgentTasks(urgent);
-        } catch (err) {
-          console.error('Error fetching tasks:', err);
-        }
-      }
+          return {
+            id: doc.id,
+            ...(data as Omit<Task, 'assignedTo'>),
+            assignedTo: assignedToArray,
+          } as Task;
+        });
+        setTasks(tasksData);
+
+        // Calculate status counts
+        const counts: { [key: string]: number } = {};
+        tasksData.forEach((task) => {
+          const status = task.status;
+          counts[status] = (counts[status] || 0) + 1;
+        });
+        setStatusCounts(counts);
+
+        // Identify urgent tasks
+        const urgent = tasksData.filter((task) => task.priority === 'Urgent');
+        setUrgentTasks(urgent);
+      });
+    }
+
+    return () => {
+      if (unsubscribeTasks) unsubscribeTasks();
     };
-
-    fetchTasks();
   }, [currentUser]);
+
+  if (!currentUser) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-4">Please log in to view the summary.</h1>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">

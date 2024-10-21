@@ -4,7 +4,7 @@ import {
   collection,
   query,
   where,
-  getDocs,
+  onSnapshot,
   Timestamp,
   doc,
   updateDoc,
@@ -26,73 +26,67 @@ const TaskBoard: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      if (currentUser) {
-        try {
-          const tasksRef = collection(db, 'tasks');
-          const q = query(tasksRef, where('userId', '==', currentUser.uid));
-          const querySnapshot = await getDocs(q);
-          const tasksData = querySnapshot.docs.map((doc) => {
-            const data = doc.data();
+    let unsubscribeTasks: () => void;
+    let unsubscribeContacts: () => void;
+    let unsubscribeCategories: () => void;
 
-            // Ensure assignedTo is always an array
-            const assignedToArray: string[] = Array.isArray(data.assignedTo)
-              ? data.assignedTo
-              : [data.assignedTo];
+    if (currentUser) {
+      // Fetch tasks with onSnapshot
+      const tasksRef = collection(db, 'tasks');
+      const tasksQuery = query(tasksRef, where('userId', '==', currentUser.uid));
 
-            return {
-              id: doc.id,
-              ...(data as Omit<Task, 'assignedTo'>),
-              assignedTo: assignedToArray,
-            };
-          });
-          setTasks(tasksData);
-        } catch (err) {
-          console.error('Error fetching tasks:', err);
-        }
-      }
-    };
+      unsubscribeTasks = onSnapshot(tasksQuery, (querySnapshot) => {
+        const tasksData = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
 
-    const fetchContacts = async () => {
-      if (currentUser) {
-        try {
-          const contactsRef = collection(db, 'contacts');
-          const q = query(contactsRef, where('userId', '==', currentUser.uid));
-          const querySnapshot = await getDocs(q);
-          const contactsData = querySnapshot.docs.map((doc) => ({
+          // Ensure assignedTo is always an array
+          const assignedToArray: string[] = Array.isArray(data.assignedTo)
+            ? data.assignedTo
+            : [data.assignedTo];
+
+          return {
             id: doc.id,
-            ...(doc.data() as Contact),
-          }));
-          setContacts(contactsData);
-        } catch (err) {
-          console.error('Error fetching contacts:', err);
-        }
-      }
-    };
+            ...(data as Omit<Task, 'assignedTo'>),
+            assignedTo: assignedToArray,
+          };
+        });
+        setTasks(tasksData);
+      });
 
-    const fetchCategories = async () => {
-      if (currentUser) {
-        try {
-          const tasksRef = collection(db, 'tasks');
-          const q = query(tasksRef, where('userId', '==', currentUser.uid));
-          const querySnapshot = await getDocs(q);
-          const categoriesSet = new Set<string>();
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            if (data.category) {
-              categoriesSet.add(data.category);
-            }
-          });
-          setCategories(Array.from(categoriesSet));
-        } catch (err) {
-          console.error('Error fetching categories:', err);
-        }
-      }
-    };
+      // Fetch contacts with onSnapshot
+      const contactsRef = collection(db, 'contacts');
+      const contactsQuery = query(
+        contactsRef,
+        where('userId', '==', currentUser.uid)
+      );
 
-    fetchTasks();
-    fetchContacts();
-    fetchCategories();
+      unsubscribeContacts = onSnapshot(contactsQuery, (querySnapshot) => {
+        const contactsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Contact),
+        }));
+        setContacts(contactsData);
+      });
+
+      // Fetch categories with onSnapshot
+      unsubscribeCategories = onSnapshot(tasksQuery, (querySnapshot) => {
+        const categoriesSet = new Set<string>();
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.category) {
+            categoriesSet.add(data.category);
+          }
+        });
+        setCategories(Array.from(categoriesSet));
+      });
+    }
+
+    // Cleanup function to unsubscribe listeners
+    return () => {
+      if (unsubscribeTasks) unsubscribeTasks();
+      if (unsubscribeContacts) unsubscribeContacts();
+      if (unsubscribeCategories) unsubscribeCategories();
+    };
   }, [currentUser]);
 
   const getContactNameById = (id: string) => {
@@ -125,12 +119,7 @@ const TaskBoard: React.FC = () => {
           subtask: updatedTask.subtask,
           status: updatedTask.status,
         });
-        // Refresh the task list
-        setTasks((prevTasks) =>
-          prevTasks.map((task) =>
-            task.id === updatedTask.id ? updatedTask : task
-          )
-        );
+        // No need to manually update tasks state; onSnapshot will handle it
         closeEditModal();
       } catch (err) {
         console.error('Error updating task:', err);
@@ -149,13 +138,20 @@ const TaskBoard: React.FC = () => {
       try {
         const taskRef = doc(db, 'tasks', taskId);
         await deleteDoc(taskRef);
-        // Remove the task from local state
-        setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+        // No need to manually update tasks state; onSnapshot will handle it
       } catch (err) {
         console.error('Error deleting task:', err);
       }
     }
   };
+
+  if (!currentUser) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-4">Please log in to view your tasks.</h1>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
