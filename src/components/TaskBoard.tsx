@@ -1,15 +1,28 @@
 // src/components/TaskBoard.tsx
 import React, { useState, useEffect, useContext } from 'react';
 import { db } from '../firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  Timestamp,
+  doc,
+  updateDoc,
+} from 'firebase/firestore';
 import { AuthContext } from '../contexts/AuthContext';
 import { Task, Contact } from '../types';
-import { Timestamp } from 'firebase/firestore';
+import EditTaskModal from './EditTaskModal';
 
 const TaskBoard: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const { currentUser } = useContext(AuthContext);
+
+  // State for the edit modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -56,13 +69,72 @@ const TaskBoard: React.FC = () => {
       }
     };
 
+    const fetchCategories = async () => {
+      if (currentUser) {
+        try {
+          const tasksRef = collection(db, 'tasks');
+          const q = query(tasksRef, where('userId', '==', currentUser.uid));
+          const querySnapshot = await getDocs(q);
+          const categoriesSet = new Set<string>();
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.category) {
+              categoriesSet.add(data.category);
+            }
+          });
+          setCategories(Array.from(categoriesSet));
+        } catch (err) {
+          console.error('Error fetching categories:', err);
+        }
+      }
+    };
+
     fetchTasks();
     fetchContacts();
+    fetchCategories();
   }, [currentUser]);
 
   const getContactNameById = (id: string) => {
     const contact = contacts.find((c) => c.id === id);
     return contact ? contact.name : 'Unknown Contact';
+  };
+
+  const openEditModal = (task: Task) => {
+    setSelectedTask(task);
+    setIsEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setSelectedTask(null);
+    setIsEditModalOpen(false);
+  };
+
+  // Function to update the task in Firestore and refresh the task list
+  const handleUpdateTask = async (updatedTask: Task) => {
+    if (currentUser && updatedTask.id) {
+      try {
+        const taskRef = doc(db, 'tasks', updatedTask.id);
+        await updateDoc(taskRef, {
+          title: updatedTask.title,
+          description: updatedTask.description,
+          priority: updatedTask.priority,
+          assignedTo: updatedTask.assignedTo,
+          category: updatedTask.category,
+          dueDate: updatedTask.dueDate,
+          subtask: updatedTask.subtask,
+          status: updatedTask.status,
+        });
+        // Refresh the task list
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === updatedTask.id ? updatedTask : task
+          )
+        );
+        closeEditModal();
+      } catch (err) {
+        console.error('Error updating task:', err);
+      }
+    }
   };
 
   return (
@@ -105,9 +177,26 @@ const TaskBoard: React.FC = () => {
               <p className="text-gray-600 mt-2">
                 <strong>Status:</strong> {task.status}
               </p>
+              {/* Edit Button */}
+              <button
+                onClick={() => openEditModal(task)}
+                className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Edit
+              </button>
             </div>
           ))}
         </div>
+      )}
+      {/* Edit Task Modal */}
+      {isEditModalOpen && selectedTask && (
+        <EditTaskModal
+          task={selectedTask}
+          contacts={contacts}
+          categories={categories}
+          onClose={closeEditModal}
+          onUpdate={handleUpdateTask}
+        />
       )}
     </div>
   );
