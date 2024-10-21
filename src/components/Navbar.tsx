@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useContext } from 'react';
-import { AuthContext } from '../AuthContext';
+import { AuthContext } from '../contexts/AuthContext';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -23,14 +23,20 @@ const Navbar: React.FC = () => {
       <Link to="/dashboard" className="text-white text-xl font-bold">
         TaskApp
       </Link>
-      <div>
+      <div className="flex items-center">
         {currentUser ? (
           <>
-          <Link
+            <Link
               to="/create-task"
-              className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 mr-4"
+              className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 mr-2"
             >
               Create Task
+            </Link>
+            <Link
+              to="/create-contact"
+              className="bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600 mr-4"
+            >
+              Create Contact
             </Link>
             <span className="text-white mr-4">
               {currentUser.email}
@@ -44,7 +50,6 @@ const Navbar: React.FC = () => {
           </>
         ) : (
           <>
-            
             <Link to="/login" className="text-white mr-4 hover:underline">
               Login
             </Link>
