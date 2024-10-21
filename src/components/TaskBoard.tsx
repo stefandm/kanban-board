@@ -213,16 +213,19 @@ const TaskBoard: React.FC = () => {
           Your tasks will appear here.
         </p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
           {tasks.map((task) => (
             <div
               key={task.id}
-              className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200"
+              className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 flex flex-col justify-evenly "
             >
-              <h2 className="text-2xl font-semibold mb-4 text-blue-700">
+              <div className=" text-xl w-fit white text-white mb-2 px-2  rounded-lg bg-blue-600">
+                <strong> {task.category}</strong>
+              </div>
+              <h2 className="text-2xl font-semibold mb-4 text-black">
                 {task.title}
               </h2>
-              <p className="text-gray-700 mb-4">{task.description}</p>
+              <p className="text-gray-700 mb-4">{task.description.length > 35 ? task.description.slice(0,25)+("...") : task.description}</p>
               <div className="flex items-center mb-4">
                 {task.assignedTo.map((id) => {
                   const initials = getContactInitialsById(id);
@@ -250,7 +253,7 @@ const TaskBoard: React.FC = () => {
                   className={`mr-2 ${getPriorityColor(task.priority)}`}
                 />
                 <span className="text-gray-600">
-                  {task.priority} Priority
+                  {task.priority}
                 </span>
               </div>
               <p className="text-gray-600 mb-2">

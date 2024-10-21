@@ -50,6 +50,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   );
   const [subtaskInput, setSubtaskInput] = useState<string>('');
   const [subtask, setSubtask] = useState<Subtask[]>(task.subtask || []);
+  const [status, setStatus] = useState<string>(task.status);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
@@ -86,6 +87,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
       category,
       dueDate: Timestamp.fromDate(new Date(dueDate)),
       subtask,
+      status,
     };
 
     try {
@@ -98,6 +100,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
         category: updatedTask.category,
         dueDate: updatedTask.dueDate,
         subtask: updatedTask.subtask,
+        status: updatedTask.status,
       });
       onUpdate(updatedTask);
       onClose();
@@ -123,9 +126,27 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
     setSubtask(newSubtasks);
   };
 
+  // Function to toggle subtask status
+  const handleSubtaskStatusChange = (index: number) => {
+    const updatedSubtasks = [...subtask];
+    updatedSubtasks[index].status =
+      updatedSubtasks[index].status === 'done' ? 'not done' : 'done';
+    setSubtask(updatedSubtasks);
+  };
+
+  // Function to edit subtask description
+  const handleSubtaskDescriptionChange = (
+    index: number,
+    newDescription: string
+  ) => {
+    const updatedSubtasks = [...subtask];
+    updatedSubtasks[index].description = newDescription;
+    setSubtask(updatedSubtasks);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg relative">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg relative overflow-y-auto max-h-screen">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -276,7 +297,28 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                     key={index}
                     className="flex items-center justify-between bg-gray-200 p-3 rounded-lg mt-2"
                   >
-                    <span>{subtaskItem.description}</span>
+                    <div className="flex items-center">
+                      {/* Checkbox to toggle status */}
+                      <input
+                        type="checkbox"
+                        className="mr-2"
+                        checked={subtaskItem.status === 'done'}
+                        onChange={() => handleSubtaskStatusChange(index)}
+                      />
+                      {/* Editable subtask description */}
+                      <input
+                        type="text"
+                        className={`flex-1 bg-transparent border-none focus:outline-none ${
+                          subtaskItem.status === 'done'
+                            ? 'line-through text-gray-500'
+                            : ''
+                        }`}
+                        value={subtaskItem.description}
+                        onChange={(e) =>
+                          handleSubtaskDescriptionChange(index, e.target.value)
+                        }
+                      />
+                    </div>
                     <button
                       type="button"
                       onClick={() => handleRemoveSubtask(index)}
@@ -309,7 +351,26 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               </select>
             </div>
           </div>
-          {/* Buttons */}
+          {/* Status */}
+          <div className="mb-6">
+            <label className="block text-gray-700 text-lg font-medium mb-2">
+              Status
+            </label>
+            <div className="relative">
+              <FaListAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <select
+                className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="To do">To do</option>
+                <option value="In progress">In progress</option>
+                <option value="Awaiting Feedback">Awaiting Feedback</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+          </div>
+          {/* Submit Button */}
           <div className="flex justify-end">
             <button
               type="submit"
