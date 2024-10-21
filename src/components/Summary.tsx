@@ -76,8 +76,8 @@ const Summary: React.FC = () => {
   const linkItemsClass = "text-3xl md:text-5xl font-bold "
 
   return (
-    <div className="container mx-auto p-6">
-    <h1 className="text-4xl md:text-5xl font-bold mt-6 mb-10">Task Summary</h1>
+    <div className="container mx-auto py-6 ">
+    <h1 className="text-4xl md:text-5xl font-bold mt-6 mb-10 text-center">Summary</h1>
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
       {/* Tasks in Board */}
@@ -94,15 +94,15 @@ const Summary: React.FC = () => {
             to="/dashboard"
             className={linkClass}
           >
-            <FaEdit size={50} className="text-5xl mb-4" />
-            <p className={" text-xl font-medium"}>To Do</p>
+            <FaEdit size={50} className="text-5xl mb-4  text-blue-600" />
+            <p className=" text-xl font-medium">To Do</p>
             <p className={linkItemsClass}>{statusCounts['To do'] || 0}</p>
           </Link>
           <Link
             to="/dashboard"
             className={linkClass}
           >
-            <FaHourglassHalf className={"text-5xl mb-4"} />
+            <FaHourglassHalf className="text-5xl mb-4 text-zinc-400" />
             <p className=" text-xl font-medium">In Progress</p>
             <p className={linkItemsClass}>{statusCounts['In progress'] || 0}</p>
           </Link>

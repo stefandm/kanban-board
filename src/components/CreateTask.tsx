@@ -172,10 +172,10 @@ const CreateTask: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-100 to-purple-100 p-4">
+    <div className="flex items-center justify-center my-10 bg-gradient-to-r p-4">
       <form
         onSubmit={handleCreateTask}
-        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl"
+        className="bg-white p-8 rounded-lg shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] w-full max-w-4xl"
       >
         <h2 className="text-3xl md:text-4xl mb-6 text-center font-bold  flex items-center justify-center">
            Create New Task
