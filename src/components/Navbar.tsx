@@ -32,7 +32,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-blue-700 sticky top-0 z-20 h-[10vh]">
+    <nav className="bg-gray-800 ">
       <div className="container mx-auto px-4 md:px-6 flex justify-between items-center h-16">
         {/* Logo */}
         <Link
@@ -64,39 +64,39 @@ const Navbar: React.FC = () => {
             <>
               <Link
                 to="/summary"
-                className="flex items-center bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 transition-colors duration-200"
+                className="flex items-center  text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
               >
                 <FaTasks className="mr-2" />
                 Summary
               </Link>
               <Link
                 to="/dashboard"
-                className="flex items-center bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200"
+                className="flex items-center  text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
               >
                 <FaTachometerAlt className="mr-2" />
                 Dashboard
               </Link>
               <Link
                 to="/create-task"
-                className="flex items-center bg-yellow-500 text-white px-3 py-2 rounded-lg hover:bg-yellow-600 transition-colors duration-200"
+                className="flex items-center  text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
               >
                 <FaPlusCircle className="mr-2" />
                 Create Task
               </Link>
               <Link
                 to="/contacts"
-                className="flex items-center bg-purple-500 text-white px-3 py-2 rounded-lg hover:bg-purple-600 transition-colors duration-200"
+                className="flex items-center  text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
               >
                 <FaAddressBook className="mr-2" />
                 Contacts
               </Link>
-              <span className="text-white flex items-center">
+              <div className="text-white px-4 flex items-center">
                 <FaUserCircle className="mr-2" size={30}/>
                 {currentUser.email?.slice(0,1)}
-              </span>
+              </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200"
+                className="flex items-center  text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
               >
                 <FaSignOutAlt className="mr-2" />
                 Logout
