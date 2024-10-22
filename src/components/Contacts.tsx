@@ -181,7 +181,7 @@ const Contacts: React.FC = () => {
         >
           <button
             onClick={openNewContactModal}
-            className="bg-gray-700 hover:bg-blue-400 text-white py-6 px-12 rounded-full text-xl font-semibold flex items-center shadow-lg transition-transform transform hover:scale-105"
+            className="bg-gray-700 hover:bg-blue-400 text-white py-6 px-4 md:px-12 rounded-full text-xl font-semibold flex items-center shadow-lg transition-transform transform hover:scale-105"
             aria-label="Add New Contact"
           >
             <FaPlusCircle className="mr-2" aria-hidden="true" />

@@ -157,7 +157,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 top-10 shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="edit-task-heading"
