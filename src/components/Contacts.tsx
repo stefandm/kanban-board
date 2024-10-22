@@ -176,12 +176,12 @@ const Contacts: React.FC = () => {
     <div className="w-full relative">
       <div className="flex flex-col md:flex-row justify-between">
         <div
-          className="fixed md:top-1/2 md:left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-[85vh] left-[50vw] z-50"
+          className="fixed md:top-1/2 md:left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-[15vh] left-[30vw] z-50"
           aria-label="New Contact Button Container"
         >
           <button
             onClick={openNewContactModal}
-            className="bg-gray-700 hover:bg-blue-400 text-white py-6 px-4 md:px-12 rounded-full text-xl font-semibold flex items-center shadow-lg transition-transform transform hover:scale-105"
+            className="bg-gray-700 hover:bg-blue-400 text-white py-3 md:py-6 px-4 md:px-12 rounded-full text-xl font-semibold flex items-center shadow-lg transition-transform transform hover:scale-105"
             aria-label="Add New Contact"
           >
             <FaPlusCircle className="mr-2" aria-hidden="true" />

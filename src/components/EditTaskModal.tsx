@@ -157,14 +157,14 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 top-[10vh] shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]"
+      className="fixed inset-0 z-10 flex items-center justify-center overflow-y-auto  bg-black bg-opacity-50 px-4 py-10 shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="edit-task-heading"
     >
       <div
         ref={modalRef} 
-        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl relative overflow-y-auto max-h-screen"
+        className="bg-white p-8 mt-10 rounded-lg shadow-lg w-full max-w-4xl relative overflow-y-auto max-h-screen"
       >
         <button
           onClick={onClose}
