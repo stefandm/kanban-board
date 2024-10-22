@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { auth } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { ZodError } from 'zod';
 
@@ -83,9 +83,13 @@ const Signup: React.FC = () => {
         </button>
         <p className="mt-4 text-center text-sm">
           Already have an account?{' '}
-          <a href="/login" className="text-blue-500 hover:underline">
-            Log In
-          </a>
+          <Link
+            to="/login"
+            className="text-blue-500 hover:underline"
+            aria-label="Sign Up"
+          >
+            Login
+          </Link>
         </p>
       </form>
     </div>
