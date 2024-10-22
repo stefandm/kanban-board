@@ -164,7 +164,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
     >
       <div
         ref={modalRef} 
-        className="bg-white p-8 mt-10 rounded-lg shadow-lg w-full max-w-4xl relative overflow-y-auto max-h-screen"
+        className="bg-white p-8 mt-[10vh] rounded-lg shadow-lg w-full max-w-4xl relative overflow-y-auto max-h-screen"
       >
         <button
           onClick={onClose}
