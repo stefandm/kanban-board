@@ -1,5 +1,3 @@
-// src/components/Navbar.tsx
-
 import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
@@ -25,7 +23,6 @@ const Navbar: React.FC = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      // Optionally, redirect to login page
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -34,7 +31,6 @@ const Navbar: React.FC = () => {
   return (
     <nav className="bg-gray-800 ">
       <div className="container mx-auto px-4 md:px-6 flex justify-between items-center h-16">
-        {/* Logo */}
         <Link
           to="/summary"
           className="text-white text-2xl md:text-3xl font-bold flex items-center"
@@ -42,7 +38,6 @@ const Navbar: React.FC = () => {
           <FaTasks className="mr-2" /> Kanban
         </Link>
 
-        {/* Hamburger Menu Button */}
         <div className="md:hidden">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -58,7 +53,6 @@ const Navbar: React.FC = () => {
           </button>
         </div>
 
-        {/* Navigation Links */}
         <div className="hidden md:flex md:items-center md:space-x-2">
           {currentUser ? (
             <>
@@ -123,7 +117,6 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">

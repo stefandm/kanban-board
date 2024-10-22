@@ -1,5 +1,3 @@
-// src/components/Summary.tsx
-
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { db } from '../firebase';
@@ -12,12 +10,12 @@ import {
 } from 'firebase/firestore';
 import { AuthContext } from '../contexts/AuthContext';
 import { Task } from '../types';
-import { 
-  FaHourglassHalf, 
-  FaComments, 
-  FaCheckCircle, 
-  FaExclamationTriangle, 
-  FaEdit 
+import {
+  FaHourglassHalf,
+  FaComments,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaEdit,
 } from 'react-icons/fa';
 
 const Summary: React.FC = () => {
@@ -50,7 +48,6 @@ const Summary: React.FC = () => {
         });
         setTasks(tasksData);
 
-        // Calculate status counts
         const counts: { [key: string]: number } = {};
         tasksData.forEach((task) => {
           const status = task.status;
@@ -58,7 +55,6 @@ const Summary: React.FC = () => {
         });
         setStatusCounts(counts);
 
-        // Identify urgent tasks
         const urgent = tasksData.filter((task) => task.priority === 'Urgent');
         setUrgentTasks(urgent);
       });
@@ -71,60 +67,131 @@ const Summary: React.FC = () => {
 
   if (!currentUser) {
     return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Please log in to view the summary.</h1>
+      <div className="p-6" role="main" aria-labelledby="login-prompt">
+        <h1 id="login-prompt" className="text-2xl font-bold mb-4">
+          Please log in to view the summary.
+        </h1>
       </div>
     );
   }
 
-  const linkClass = "rounded-2xl p-8 flex flex-col items-center justify-center hover:bg-gray-700 hover:text-white transition-colors duration-200 shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]";
-  const linkTitleClass = "text-3xl text-center font-medium";
-  const linkItemsClass = "text-3xl md:text-5xl font-bold";
+  const linkClass =
+    'rounded-2xl p-8 flex flex-col items-center justify-center hover:bg-gray-700 hover:text-white transition-colors duration-200 shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] focus:outline-none focus:ring-2 focus:ring-blue-500';
+  const linkTitleClass = 'text-3xl text-center font-medium';
+  const linkItemsClass = 'text-3xl md:text-5xl font-bold';
 
   return (
-    <div className="container mx-auto py-6 w-full">
-      <h1 className="text-4xl md:text-5xl font-bold mt-6 mb-10 text-center">Summary</h1>
+    <main
+      className="container mx-auto py-6 w-full"
+      role="main"
+      aria-labelledby="summary-heading"
+    >
+      <h1
+        id="summary-heading"
+        className="text-4xl md:text-5xl font-bold mt-6 mb-10 text-center"
+      >
+        Summary
+      </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <section
+        className="grid grid-cols-1 md:grid-cols-2 gap-10"
+        aria-labelledby="tasks-in-board"
+      >
         {/* Tasks in Board */}
-        <div className="bg-white rounded-lg p-8">
+        <div
+          className="bg-white rounded-lg p-8"
+          aria-labelledby="tasks-in-board"
+        >
+          <h2 id="tasks-in-board" className="sr-only">
+            Tasks in Board
+          </h2>
           <div className="transition duration-200 text-center grid grid-cols-2 sm:grid-cols-3 gap-8">
-            <Link to="/dashboard" className={linkClass}>
+            <Link
+              to="/dashboard"
+              className={linkClass}
+              aria-label="View Total Tasks"
+            >
               <p className={linkTitleClass}>Total Tasks</p>
               <p className={linkItemsClass}>{tasks.length}</p>
             </Link>
-            <Link to="/dashboard" className={linkClass}>
-              <FaEdit size={50} className="text-5xl mb-4 text-blue-600" />
+            <Link
+              to="/dashboard"
+              className={linkClass}
+              aria-label="View To Do Tasks"
+            >
+              <FaEdit
+                size={50}
+                className="text-5xl mb-4 text-blue-600"
+                aria-hidden="true"
+              />
               <p className="text-xl font-medium">To Do</p>
-              <p className={linkItemsClass}>{statusCounts['To do'] || 0}</p>
+              <p className={linkItemsClass}>
+                {statusCounts['To do'] || 0}
+              </p>
             </Link>
-            <Link to="/dashboard" className={linkClass}>
-              <FaHourglassHalf className="text-5xl mb-4 text-zinc-400" />
+            <Link
+              to="/dashboard"
+              className={linkClass}
+              aria-label="View In Progress Tasks"
+            >
+              <FaHourglassHalf
+                className="text-5xl mb-4 text-zinc-400"
+                aria-hidden="true"
+              />
               <p className="text-xl font-medium">In Progress</p>
-              <p className={linkItemsClass}>{statusCounts['In progress'] || 0}</p>
+              <p className={linkItemsClass}>
+                {statusCounts['In progress'] || 0}
+              </p>
             </Link>
-            <Link to="/dashboard" className={linkClass}>
-              <FaComments className="text-orange-600 text-5xl mb-4" />
+            <Link
+              to="/dashboard"
+              className={linkClass}
+              aria-label="View Awaiting Feedback Tasks"
+            >
+              <FaComments
+                className="text-orange-600 text-5xl mb-4"
+                aria-hidden="true"
+              />
               <p className="text-xl font-medium">Awaiting Feedback</p>
               <p className={linkItemsClass}>
                 {statusCounts['Awaiting Feedback'] || 0}
               </p>
             </Link>
-            <Link to="/dashboard" className={linkClass}>
-              <FaCheckCircle className="text-green-600 text-5xl mb-4" />
+            <Link
+              to="/dashboard"
+              className={linkClass}
+              aria-label="View Completed Tasks"
+            >
+              <FaCheckCircle
+                className="text-green-600 text-5xl mb-4"
+                aria-hidden="true"
+              />
               <p className="text-xl font-medium">Completed</p>
-              <p className={linkItemsClass}>{statusCounts['Completed'] || 0}</p>
+              <p className={linkItemsClass}>
+                {statusCounts['Completed'] || 0}
+              </p>
             </Link>
           </div>
         </div>
 
-        {/* Urgent Tasks */}
-        <div className="bg-white rounded-lg p-8">
-          <h2 className="text-3xl md:text-4xl font-semibold mb-8 text-red-700 flex items-center">
-            <FaExclamationTriangle className="mr-4 text-4xl md:text-5xl" /> Urgent Tasks
+        <section
+          className="bg-white rounded-lg p-8"
+          aria-labelledby="urgent-tasks-heading"
+        >
+          <h2
+            id="urgent-tasks-heading"
+            className="text-3xl md:text-4xl font-semibold mb-8 text-red-700 flex items-center"
+          >
+            <FaExclamationTriangle
+              className="mr-4 text-4xl md:text-5xl"
+              aria-hidden="true"
+            />
+            Urgent Tasks
           </h2>
           {urgentTasks.length === 0 ? (
-            <p className="text-gray-800 text-xl">No urgent tasks.</p>
+            <p className="text-gray-800 text-xl" role="status">
+              No urgent tasks.
+            </p>
           ) : (
             <ul>
               {urgentTasks.map((task) => (
@@ -132,6 +199,7 @@ const Summary: React.FC = () => {
                   <Link
                     to="/dashboard"
                     className="block border-l-4 border-red-600 rounded-xl p-6 hover:bg-red-400 hover:text-white transition-colors duration-200 shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]"
+                    aria-label={`View task ${task.title}`}
                   >
                     <div className="flex items-center justify-between">
                       <p className="font-semibold text-xl">{task.title}</p>
@@ -147,9 +215,9 @@ const Summary: React.FC = () => {
               ))}
             </ul>
           )}
-        </div>
-      </div>
-    </div>
+        </section>
+      </section>
+    </main>
   );
 };
 

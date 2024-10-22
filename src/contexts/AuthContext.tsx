@@ -1,4 +1,3 @@
-// src/contexts/AuthContext.tsx
 import React, { createContext, useEffect, useState } from 'react';
 import { auth } from '../firebase';
 import { User } from 'firebase/auth';
@@ -15,12 +14,12 @@ export const AuthContext = createContext<AuthContextProps>({
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true); // Initialize loading state
+  const [loading, setLoading] = useState<boolean>(true); 
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
-      setLoading(false); // Authentication state has been determined
+      setLoading(false);
     });
 
     return () => {

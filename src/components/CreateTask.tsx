@@ -1,5 +1,3 @@
-// src/components/CreateTask.tsx
-
 import React, { useState, useContext, useEffect } from 'react';
 import { db } from '../firebase';
 import {
@@ -162,7 +160,6 @@ const CreateTask: React.FC = () => {
     setError('');
   };
 
-  // Function to handle creation of a new category and add it to the categories list
   const handleCreateCategory = (inputValue: string) => {
     const newCategory = inputValue.trim();
     if (newCategory && !categories.includes(newCategory)) {
@@ -172,65 +169,96 @@ const CreateTask: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center my-10 bg-gradient-to-r p-4">
+    <div
+      className="flex items-center justify-center my-10 bg-gradient-to-r p-4"
+      role="main"
+      aria-labelledby="create-task-heading"
+    >
       <form
         onSubmit={handleCreateTask}
         className="bg-white p-8 rounded-lg shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] w-full max-w-4xl"
+        aria-labelledby="create-task-heading"
       >
-        <h2 className="text-3xl md:text-4xl mb-6 text-center font-bold  flex items-center justify-center">
-           Create New Task
+        <h2
+          id="create-task-heading"
+          className="text-3xl md:text-4xl mb-6 text-center font-bold flex items-center justify-center"
+        >
+          Create New Task
         </h2>
-        {error && <div className="mb-6 text-red-500 text-md">{error}</div>}
+        {error && (
+          <div className="mb-6 text-red-500 text-md" role="alert">
+            {error}
+          </div>
+        )}
 
-        {/* Responsive Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column */}
           <div>
-            {/* Title */}
             <div className="mb-6">
-              <label className="block text-gray-700 text-lg font-medium mb-2">
+              <label
+                htmlFor="title"
+                className="block text-gray-700 text-lg font-medium mb-2"
+              >
                 Title
               </label>
               <div className="relative">
-                <FaTasks className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FaTasks
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  aria-hidden="true"
+                />
                 <input
+                  id="title"
                   type="text"
                   required
                   className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Task Title"
+                  aria-required="true"
                 />
               </div>
             </div>
 
-            {/* Description */}
             <div className="mb-6">
-              <label className="block text-gray-700 text-lg font-medium mb-2">
+              <label
+                htmlFor="description"
+                className="block text-gray-700 text-lg font-medium mb-2"
+              >
                 Description
               </label>
               <div className="relative">
-                <FaListAlt className="absolute left-3 top-3 text-gray-400" />
+                <FaListAlt
+                  className="absolute left-3 top-3 text-gray-400"
+                  aria-hidden="true"
+                />
                 <textarea
+                  id="description"
                   required
                   className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Task Description"
                   rows={4}
+                  aria-required="true"
                 ></textarea>
               </div>
             </div>
 
-            {/* Assigned To */}
             <div className="mb-6">
-              <label className="block text-gray-700 text-lg font-medium mb-2">
+              <label
+                htmlFor="assignedTo"
+                className="block text-gray-700 text-lg font-medium mb-2"
+              >
                 Assigned To
               </label>
               <div className="relative">
-                <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FaUser
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  aria-hidden="true"
+                />
                 <div className="pl-12">
                   <Select
+                    id="assignedTo"
                     isMulti
                     options={contacts.map((contact) => ({
                       value: contact.id,
@@ -253,20 +281,27 @@ const CreateTask: React.FC = () => {
                       );
                     }}
                     placeholder="Select Contacts"
+                    aria-label="Select Contacts to Assign"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Category */}
             <div className="mb-6">
-              <label className="block text-gray-700 text-lg font-medium mb-2">
+              <label
+                htmlFor="category"
+                className="block text-gray-700 text-lg font-medium mb-2"
+              >
                 Category
               </label>
               <div className="relative">
-                <FaTag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FaTag
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  aria-hidden="true"
+                />
                 <div className="pl-12">
                   <CreatableSelect
+                    id="category"
                     isClearable
                     options={categories.map((cat) => ({
                       value: cat,
@@ -282,6 +317,7 @@ const CreateTask: React.FC = () => {
                     }}
                     onCreateOption={handleCreateCategory}
                     placeholder="Enter or select a category"
+                    aria-label="Select or Create Category"
                   />
                 </div>
               </div>
@@ -290,43 +326,58 @@ const CreateTask: React.FC = () => {
 
           {/* Right Column */}
           <div>
-            {/* Due Date */}
             <div className="mb-6">
-              <label className="block text-gray-700 text-lg font-medium mb-2">
+              <label
+                htmlFor="dueDate"
+                className="block text-gray-700 text-lg font-medium mb-2"
+              >
                 Due Date
               </label>
               <div className="relative">
-                <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FaCalendarAlt
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  aria-hidden="true"
+                />
                 <input
+                  id="dueDate"
                   type="date"
                   required
                   className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
+                  aria-required="true"
                 />
               </div>
             </div>
 
-            {/* Subtasks */}
             <div className="mb-6">
-              <label className="block text-gray-700 text-lg font-medium mb-2">
+              <label
+                htmlFor="subtaskInput"
+                className="block text-gray-700 text-lg font-medium mb-2"
+              >
                 Subtasks
               </label>
               <div className="flex">
                 <div className="relative w-full">
-                  <FaTasks className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <FaTasks
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    aria-hidden="true"
+                  />
                   <input
+                    id="subtaskInput"
                     type="text"
                     className="w-full pl-12 pr-4 py-3 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={subtaskInput}
                     onChange={(e) => setSubtaskInput(e.target.value)}
                     placeholder="Enter a subtask"
+                    aria-label="Subtask Description"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={handleAddSubtask}
                   className="bg-gray-700 text-white px-4 py-3 rounded-r-lg hover:bg-blue-700 transition-colors duration-200"
+                  aria-label="Add Subtask"
                 >
                   Add
                 </button>
@@ -343,8 +394,9 @@ const CreateTask: React.FC = () => {
                         type="button"
                         onClick={() => handleRemoveSubtask(index)}
                         className="text-red-500 hover:text-red-700 transition-colors duration-200"
+                        aria-label={`Remove subtask ${index + 1}`}
                       >
-                        <FaTrashAlt />
+                        <FaTrashAlt aria-hidden="true" />
                       </button>
                     </li>
                   ))}
@@ -352,19 +404,27 @@ const CreateTask: React.FC = () => {
               )}
             </div>
 
-            {/* Priority */}
             <div className="mb-6">
-              <label className="block text-gray-700 text-lg font-medium mb-2">
+              <label
+                htmlFor="priority"
+                className="block text-gray-700 text-lg font-medium mb-2"
+              >
                 Priority
               </label>
               <div className="relative">
-                <FaExclamationCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FaExclamationCircle
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  aria-hidden="true"
+                />
                 <select
+                  id="priority"
                   className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={priority}
                   onChange={(e) =>
                     setPriority(e.target.value as 'Low' | 'Normal' | 'Urgent')
                   }
+                  aria-label="Select Task Priority"
+                  aria-required="true"
                 >
                   <option value="Low">Low</option>
                   <option value="Normal">Normal</option>
@@ -375,21 +435,22 @@ const CreateTask: React.FC = () => {
           </div>
         </div>
 
-        {/* Buttons */}
         <div className="flex justify-between mt-6">
           <button
             type="button"
             onClick={handleClearFields}
-            className="w-full lg:w-1/2   py-3 rounded-lg hover:text-blue-800 hover:bg-blue-100 transition-colors duration-200 text-lg font-semibold mr-2 flex items-center justify-center  shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] "
+            className="w-full lg:w-1/2 py-3 rounded-lg hover:text-blue-800 hover:bg-blue-100 transition-colors duration-200 text-lg font-semibold mr-2 flex items-center justify-center shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]"
+            aria-label="Clear All Fields"
           >
-            <FaEraser className="mr-2" />
+            <FaEraser className="mr-2" aria-hidden="true" />
             Clear
           </button>
           <button
             type="submit"
             className="w-full lg:w-1/2 shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] py-3 rounded-lg bg-gray-500 hover:bg-green-700 text-white transition-colors duration-200 text-lg font-semibold ml-2 flex items-center justify-center"
+            aria-label="Create Task"
           >
-            <FaPlusCircle className="mr-2" />
+            <FaPlusCircle className="mr-2" aria-hidden="true" />
             Create Task
           </button>
         </div>

@@ -1,15 +1,14 @@
-// src/components/Modal.tsx
-
 import React, { useEffect, useRef } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import useClickOutside from '../hooks/useClickOutside'; // Adjust the path as necessary
+import useClickOutside from '../hooks/useClickOutside';
 
 interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
+  ariaLabel: string; // Added ariaLabel as a required string
 }
 
-const Modal: React.FC<ModalProps> = ({ onClose, children }) => {
+const Modal: React.FC<ModalProps> = ({ onClose, children, ariaLabel }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useClickOutside(modalRef, () => {
@@ -17,7 +16,6 @@ const Modal: React.FC<ModalProps> = ({ onClose, children }) => {
   });
 
   useEffect(() => {
-    // Prevent background scrolling
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = 'auto';
@@ -25,11 +23,16 @@ const Modal: React.FC<ModalProps> = ({ onClose, children }) => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div 
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={ariaLabel} 
+    >
+      <div
         ref={modalRef}
-      className="bg-white rounded-lg  w-full max-w-lg relative">
-        {/* Close Button */}
+        className="bg-white rounded-lg w-full max-w-lg relative"
+      >
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 focus:outline-none"
@@ -37,7 +40,6 @@ const Modal: React.FC<ModalProps> = ({ onClose, children }) => {
         >
           <FaTimes size={20} />
         </button>
-        {/* Modal Content */}
         <div className="p-6">{children}</div>
       </div>
     </div>
