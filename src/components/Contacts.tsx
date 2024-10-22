@@ -176,7 +176,7 @@ const Contacts: React.FC = () => {
     <div className="w-full relative">
       <div className="flex flex-col md:flex-row justify-between">
         <div
-          className="fixed md:top-1/2 md:left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-[90vh] left-[50vw] z-50"
+          className="fixed md:top-1/2 md:left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-[85vh] left-[50vw] z-50"
           aria-label="New Contact Button Container"
         >
           <button
