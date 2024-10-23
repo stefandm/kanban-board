@@ -211,23 +211,24 @@ const Contacts: React.FC = () => {
                 <button
                   key={contact.id}
                   onClick={() => openEditContactModal(contact)}
-                  className="group bg-white w-[80%] mx-8 my-6 py-2 px-12 border-b-2 rounded-t-xl border-gray-500 flex justify-between items-center cursor-pointer hover:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="group bg-white w-[80%] mx-8 my-6 py-2 pl-4 pr-12 border-b-2 rounded-t-xl border-gray-500 flex justify-between items-center cursor-pointer hover:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   aria-label={`Edit contact ${contact.name}`}
                 >
                   <div
-                    className="min-w-12 min-h-12 rounded-full bg-blue-600 group-hover:bg-blue-400 flex items-center justify-center text-white font-bold mr-4"
+                    className="min-w-12 min-h-12 rounded-full bg-blue-600 group-hover:bg-blue-400 flex items-center justify-center text-white text-xl font-light mr-4"
                     aria-hidden="true"
                   >
-                    {contact.name.charAt(0).toUpperCase()}
+                    {/* {contact.name.charAt(0).toUpperCase()} */}
+                    {contact.name.split(' ').map((n) => n[0]).join('').toUpperCase()}
                   </div>
-                  <div className="text-left">
-                    <p className="text-xl font-bold text-gray-700 group-hover:text-white">
+                  <div className="">
+                    <p className="text-xl text-center  font-bold text-gray-700 group-hover:text-white">
                       {contact.name}
                     </p>
-                    <p className="text-blue-700 text-sm flex items-center mt-2 group-hover:text-white">
+                    <p className="text-blue-700 text-sm flex justify-center mt-2 group-hover:text-white">
                       {contact.email}
                     </p>
-                    <p className="flex items-center mt-1 text-green-800 group-hover:text-white">
+                    <p className="flex justify-center mt-1 text-green-800 group-hover:text-white">
                       {contact.phoneNumber}
                     </p>
                   </div>
