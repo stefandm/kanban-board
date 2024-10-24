@@ -1,4 +1,3 @@
-// src/types.ts
 import { Timestamp } from 'firebase/firestore';
 
 export interface Subtask {
@@ -13,11 +12,12 @@ export interface Task {
   priority: 'Low' | 'Normal' | 'Urgent';
   createdAt: Timestamp;
   userId: string;
-  assignedTo:string[];
+  assignedTo: string[];
   category: string;
   dueDate: Timestamp;
   subtask?: Subtask[];
   status: string;
+  order: number; 
 }
 
 export interface Contact {

@@ -4,11 +4,11 @@ import Signup from './components/Signup';
 import Login from './components/Login';
 import TaskBoard from './components/TaskBoard';
 import Navbar from './components/Navbar';
-import CreateTask from './components/CreateTask';
-import Contacts from './components/Contacts';
+import CreateTask from './components/CreateTask/CreateTask';
+import Contacts from './components/Contacts/Contacts';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
-import Summary from './components/Summary';
+import Summary from './components/Summary/Summary';
 
 const App: React.FC = () => {
   const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState<boolean>(false);

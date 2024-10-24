@@ -1,15 +1,6 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { db } from '../firebase';
-import {
-  collection,
-  query,
-  where,
-  onSnapshot,
-  Timestamp,
-} from 'firebase/firestore';
-import { AuthContext } from '../contexts/AuthContext';
-import { Task } from '../types';
+import { Task } from '../../types';
 import {
   FaHourglassHalf,
   FaComments,
@@ -17,55 +8,38 @@ import {
   FaExclamationTriangle,
   FaEdit,
 } from 'react-icons/fa';
+import { Timestamp } from 'firebase/firestore';
 
-const Summary: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [statusCounts, setStatusCounts] = useState<{ [key: string]: number }>({});
-  const [urgentTasks, setUrgentTasks] = useState<Task[]>([]);
-  const { currentUser } = useContext(AuthContext);
+interface StatusCounts {
+  [key: string]: number;
+}
 
-  useEffect(() => {
-    let unsubscribeTasks: () => void;
+interface SummaryUIProps {
+  tasks: Task[];
+  statusCounts: StatusCounts;
+  urgentTasks: Task[];
+  loading: boolean;
+  isAuthenticated: boolean;
+}
 
-    if (currentUser) {
-      const tasksRef = collection(db, 'tasks');
-      const q = query(tasksRef, where('userId', '==', currentUser.uid));
+const SummaryUI: React.FC<SummaryUIProps> = ({
+  tasks,
+  statusCounts,
+  urgentTasks,
+  loading,
+  isAuthenticated,
+}) => {
+  if (loading) {
+    return (
+      <div className="p-6" role="main" aria-labelledby="loading">
+        <h1 id="loading" className="text-2xl font-bold mb-4">
+          Loading summary...
+        </h1>
+      </div>
+    );
+  }
 
-      unsubscribeTasks = onSnapshot(q, (querySnapshot) => {
-        const tasksData = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-
-          // Ensure assignedTo is always an array
-          const assignedToArray: string[] = Array.isArray(data.assignedTo)
-            ? data.assignedTo
-            : [data.assignedTo];
-
-          return {
-            id: doc.id,
-            ...(data as Omit<Task, 'assignedTo' | 'id'>), // Omit 'id' to prevent duplication
-            assignedTo: assignedToArray,
-          } as Task;
-        });
-        setTasks(tasksData);
-
-        const counts: { [key: string]: number } = {};
-        tasksData.forEach((task) => {
-          const status = task.status;
-          counts[status] = (counts[status] || 0) + 1;
-        });
-        setStatusCounts(counts);
-
-        const urgent = tasksData.filter((task) => task.priority === 'Urgent');
-        setUrgentTasks(urgent);
-      });
-    }
-
-    return () => {
-      if (unsubscribeTasks) unsubscribeTasks();
-    };
-  }, [currentUser]);
-
-  if (!currentUser) {
+  if (!isAuthenticated) {
     return (
       <div className="p-6" role="main" aria-labelledby="login-prompt">
         <h1 id="login-prompt" className="text-2xl font-bold mb-4">
@@ -221,4 +195,4 @@ const Summary: React.FC = () => {
   );
 };
 
-export default Summary;
+export default SummaryUI;

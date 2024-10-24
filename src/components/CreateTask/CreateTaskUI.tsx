@@ -1,17 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { db } from '../firebase';
-import {
-  collection,
-  addDoc,
-  Timestamp,
-  query,
-  where,
-  getDocs,
-} from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../contexts/AuthContext';
-import { Contact, Subtask } from '../types';
-import { FirebaseError } from 'firebase/app';
+import React from 'react';
 import {
   FaPlusCircle,
   FaUser,
@@ -25,182 +12,66 @@ import {
 } from 'react-icons/fa';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
-import Modal from './Modal';
+import Modal from '../Modal';
+import { CreateTaskLogicData } from './CreateTaskLogic';
 
-interface CreateTaskProps {
+interface CreateTaskUIProps extends CreateTaskLogicData {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const CreateTask: React.FC<CreateTaskProps> = ({ isOpen, onClose }) => {
-  const [title, setTitle] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
-  const [priority, setPriority] = useState<'Low' | 'Normal' | 'Urgent'>('Normal');
-  const [assignedTo, setAssignedTo] = useState<Contact[]>([]);
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [category, setCategory] = useState<string>('');
-  const [categories, setCategories] = useState<string[]>([]);
-  const [dueDate, setDueDate] = useState<string>('');
-  const [subtaskInput, setSubtaskInput] = useState<string>('');
-  const [subtask, setSubtask] = useState<Subtask[]>([]);
-  const [error, setError] = useState<string>('');
-  const navigate = useNavigate();
-  const { currentUser } = useContext(AuthContext);
-
-  useEffect(() => {
-    const fetchContacts = async () => {
-      if (currentUser) {
-        try {
-          const contactsRef = collection(db, 'contacts');
-          const q = query(contactsRef, where('userId', '==', currentUser.uid));
-          const querySnapshot = await getDocs(q);
-          const contactsData = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...(doc.data() as Contact),
-          }));
-          setContacts(contactsData);
-        } catch (err) {
-          console.error('Error fetching contacts:', err);
-        }
-      }
-    };
-
-    const fetchCategories = async () => {
-      if (currentUser) {
-        try {
-          const tasksRef = collection(db, 'tasks');
-          const q = query(tasksRef, where('userId', '==', currentUser.uid));
-          const querySnapshot = await getDocs(q);
-          const categoriesSet = new Set<string>();
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            if (data.category) {
-              categoriesSet.add(data.category);
-            }
-          });
-          setCategories(Array.from(categoriesSet));
-        } catch (err) {
-          console.error('Error fetching categories:', err);
-        }
-      }
-    };
-
-    fetchContacts();
-    fetchCategories();
-  }, [currentUser]);
-
-  // Handle subtask status toggle
-  const handleSubtaskStatusChange = (index: number) => {
-    const updatedSubtasks = [...subtask];
-    updatedSubtasks[index].status = updatedSubtasks[index].status === 'done' ? 'not done' : 'done';
-    setSubtask(updatedSubtasks);
-  };
-
-  // Handle subtask description change
-  const handleSubtaskDescriptionChange = (index: number, newDescription: string) => {
-    const updatedSubtasks = [...subtask];
-    updatedSubtasks[index].description = newDescription;
-    setSubtask(updatedSubtasks);
-  };
-
-  const handleCreateTask = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!currentUser) {
-      setError('You must be logged in to create a task.');
-      return;
-    }
-
-    if (
-      title.trim() === '' ||
-      description.trim() === '' ||
-      assignedTo.length === 0 ||
-      category.trim() === '' ||
-      dueDate.trim() === ''
-    ) {
-      setError(
-        'Title, Description, Assigned To, Category, and Due Date are required.'
-      );
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, 'tasks'), {
-        title,
-        description,
-        priority,
-        assignedTo: assignedTo.map((contact) => contact.id),
-        category,
-        dueDate: Timestamp.fromDate(new Date(dueDate)),
-        createdAt: Timestamp.fromDate(new Date()),
-        userId: currentUser.uid,
-        subtask,
-        status: 'To do',
-      });
-      onClose();
-      navigate('/dashboard');
-    } catch (err: unknown) {
-      console.error('Error adding task:', err);
-
-      if (err instanceof FirebaseError) {
-        setError(err.message);
-      } else if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Failed to create task. Please try again.');
-      }
-    }
-  };
-
-  const handleAddSubtask = () => {
-    if (subtaskInput.trim() !== '') {
-      const newSubtask: Subtask = {
-        description: subtaskInput.trim(),
-        status: 'not done',
-      };
-      setSubtask([...subtask, newSubtask]);
-      setSubtaskInput('');
-    }
-  };
-
-  const handleRemoveSubtask = (index: number) => {
-    const newSubtasks = subtask.filter((_, idx) => idx !== index);
-    setSubtask(newSubtasks);
-  };
-
-  const handleClearFields = () => {
-    setTitle('');
-    setDescription('');
-    setPriority('Normal');
-    setAssignedTo([]);
-    setCategory('');
-    setDueDate('');
-    setSubtask([]);
-    setSubtaskInput('');
-    setError('');
-  };
-
-  const handleCreateCategory = (inputValue: string) => {
-    const newCategory = inputValue.trim();
-    if (newCategory && !categories.includes(newCategory)) {
-      setCategories((prev) => [...prev, newCategory]);
-    }
-    setCategory(newCategory);
-  };
-
+const CreateTaskUI: React.FC<CreateTaskUIProps> = ({
+  isOpen,
+  onClose,
+  title,
+  setTitle,
+  description,
+  setDescription,
+  priority,
+  setPriority,
+  assignedTo,
+  setAssignedTo,
+  contacts,
+  category,
+  setCategory,
+  categories,
+  dueDate,
+  setDueDate,
+  subtaskInput,
+  setSubtaskInput,
+  subtask,
+  error,
+  handleSubtaskStatusChange,
+  handleSubtaskDescriptionChange,
+  handleCreateTask,
+  handleAddSubtask,
+  handleRemoveSubtask,
+  handleClearFields,
+  handleCreateCategory,
+}) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Create Task Modal">
-      <form onSubmit={handleCreateTask} className="bg-white p-8 rounded-lg" aria-labelledby="create-task-heading">
+      <form
+        onSubmit={handleCreateTask}
+        className="bg-white p-8 rounded-lg"
+        aria-labelledby="create-task-heading"
+      >
         <h2
           id="create-task-heading"
           className="text-3xl md:text-4xl mb-6 text-center font-bold flex items-center justify-center"
         >
-          <FaPlusCircle className="mr-3 text-blue-700 text-4xl" aria-hidden="true" />
+          <FaPlusCircle
+            className="mr-3 text-blue-700 text-4xl"
+            aria-hidden="true"
+          />
           Create New Task
         </h2>
         {error && (
-          <div className="mb-6 text-red-500 text-md" role="alert">
+          <div
+            className="mb-6 text-red-500 text-md"
+            role="alert"
+            aria-live="assertive"
+          >
             {error}
           </div>
         )}
@@ -209,7 +80,10 @@ const CreateTask: React.FC<CreateTaskProps> = ({ isOpen, onClose }) => {
           {/* Left Column */}
           <div>
             <div className="mb-6">
-              <label htmlFor="title" className="block text-gray-700 text-lg font-medium mb-2">
+              <label
+                htmlFor="title"
+                className="block text-gray-700 text-lg font-medium mb-2"
+              >
                 Title
               </label>
               <div className="relative">
@@ -231,7 +105,10 @@ const CreateTask: React.FC<CreateTaskProps> = ({ isOpen, onClose }) => {
             </div>
 
             <div className="mb-6">
-              <label htmlFor="description" className="block text-gray-700 text-lg font-medium mb-2">
+              <label
+                htmlFor="description"
+                className="block text-gray-700 text-lg font-medium mb-2"
+              >
                 Description
               </label>
               <div className="relative">
@@ -253,7 +130,10 @@ const CreateTask: React.FC<CreateTaskProps> = ({ isOpen, onClose }) => {
             </div>
 
             <div className="mb-6">
-              <label htmlFor="assignedTo" className="block text-gray-700 text-lg font-medium mb-2">
+              <label
+                htmlFor="assignedTo"
+                className="block text-gray-700 text-lg font-medium mb-2"
+              >
                 Assigned To
               </label>
               <div className="relative">
@@ -278,7 +158,9 @@ const CreateTask: React.FC<CreateTaskProps> = ({ isOpen, onClose }) => {
                     onChange={(selectedOptions) => {
                       setAssignedTo(
                         selectedOptions.map((option) => {
-                          const contact = contacts.find((c) => c.id === option.value);
+                          const contact = contacts.find(
+                            (c) => c.id === option.value
+                          );
                           return contact!;
                         })
                       );
@@ -291,7 +173,10 @@ const CreateTask: React.FC<CreateTaskProps> = ({ isOpen, onClose }) => {
             </div>
 
             <div className="mb-6">
-              <label htmlFor="category" className="block text-gray-700 text-lg font-medium mb-2">
+              <label
+                htmlFor="category"
+                className="block text-gray-700 text-lg font-medium mb-2"
+              >
                 Category
               </label>
               <div className="relative">
@@ -307,7 +192,9 @@ const CreateTask: React.FC<CreateTaskProps> = ({ isOpen, onClose }) => {
                       value: cat,
                       label: cat,
                     }))}
-                    value={category ? { value: category, label: category } : null}
+                    value={
+                      category ? { value: category, label: category } : null
+                    }
                     onChange={(newValue) => {
                       if (newValue) {
                         setCategory(newValue.value);
@@ -327,7 +214,10 @@ const CreateTask: React.FC<CreateTaskProps> = ({ isOpen, onClose }) => {
           {/* Right Column */}
           <div>
             <div className="mb-6">
-              <label htmlFor="dueDate" className="block text-gray-700 text-lg font-medium mb-2">
+              <label
+                htmlFor="dueDate"
+                className="block text-gray-700 text-lg font-medium mb-2"
+              >
                 Due Date
               </label>
               <div className="relative">
@@ -405,7 +295,10 @@ const CreateTask: React.FC<CreateTaskProps> = ({ isOpen, onClose }) => {
                           }`}
                           value={subtaskItem.description}
                           onChange={(e) =>
-                            handleSubtaskDescriptionChange(index, e.target.value)
+                            handleSubtaskDescriptionChange(
+                              index,
+                              e.target.value
+                            )
                           }
                           aria-label={`Subtask ${index + 1} Description`}
                         />
@@ -425,7 +318,10 @@ const CreateTask: React.FC<CreateTaskProps> = ({ isOpen, onClose }) => {
             </div>
 
             <div className="mb-6">
-              <label htmlFor="priority" className="block text-gray-700 text-lg font-medium mb-2">
+              <label
+                htmlFor="priority"
+                className="block text-gray-700 text-lg font-medium mb-2"
+              >
                 Priority
               </label>
               <div className="relative">
@@ -455,10 +351,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({ isOpen, onClose }) => {
         <div className="flex justify-between mt-6">
           <button
             type="button"
-            onClick={() => {
-              handleClearFields();
-              onClose();
-            }}
+            onClick={handleClearFields} // Only clears the fields
             className="w-full lg:w-1/2 py-3 rounded-lg hover:text-blue-800 hover:bg-blue-100 transition-colors duration-200 text-lg font-semibold mr-2 flex items-center justify-center shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]"
             aria-label="Clear All Fields"
           >
@@ -479,4 +372,4 @@ const CreateTask: React.FC<CreateTaskProps> = ({ isOpen, onClose }) => {
   );
 };
 
-export default CreateTask;
+export default CreateTaskUI;

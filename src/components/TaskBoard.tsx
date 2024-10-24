@@ -7,15 +7,14 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  orderBy,
+  writeBatch,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { AuthContext } from '../contexts/AuthContext';
 import { Task, Contact, Subtask } from '../types';
 import EditTaskModal from './EditTaskModal';
-import {
-  FaEdit,
-  FaTrashAlt,
-} from 'react-icons/fa';
+import { FaEdit, FaTrashAlt } from 'react-icons/fa';
 import {
   MdKeyboardDoubleArrowDown,
   MdKeyboardDoubleArrowRight,
@@ -27,7 +26,7 @@ import {
   Draggable,
   DropResult,
 } from '@hello-pangea/dnd';
-import Modal from './Modal'; // Ensure EditTaskModal uses the enhanced Modal
+import Modal from './Modal'; 
 
 const columnsOrder = ['To do', 'In progress', 'Awaiting Feedback', 'Completed'];
 
@@ -37,7 +36,6 @@ const TaskBoard: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const { currentUser } = useContext(AuthContext);
 
-  // State for the edit modal
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     task?: Task;
@@ -50,10 +48,15 @@ const TaskBoard: React.FC = () => {
 
     if (currentUser) {
       const tasksRef = collection(db, 'tasks');
-      const tasksQuery = query(tasksRef, where('userId', '==', currentUser.uid));
+      const tasksQuery = query(
+        tasksRef,
+        where('userId', '==', currentUser.uid),
+        orderBy('status'),
+        orderBy('order') 
+      );
 
       unsubscribeTasks = onSnapshot(tasksQuery, (querySnapshot) => {
-        const tasksData = querySnapshot.docs.map((doc) => {
+        const tasksData: Task[] = querySnapshot.docs.map((doc) => {
           const data = doc.data();
 
           const assignedToArray: string[] = Array.isArray(data.assignedTo)
@@ -65,7 +68,7 @@ const TaskBoard: React.FC = () => {
             : [];
 
           const taskData: Task = {
-            id: doc.id, 
+            id: doc.id,
             title: data.title,
             description: data.description,
             priority: data.priority,
@@ -75,7 +78,8 @@ const TaskBoard: React.FC = () => {
             category: data.category,
             dueDate: data.dueDate,
             subtask: subtaskArray,
-            status: data.status || 'To do', 
+            status: data.status || 'To do',
+            order: typeof data.order === 'number' ? data.order : 0, // Ensure order is set
           };
 
           return taskData;
@@ -83,7 +87,6 @@ const TaskBoard: React.FC = () => {
         setTasks(tasksData);
       });
 
-      // Fetch contacts with onSnapshot
       const contactsRef = collection(db, 'contacts');
       const contactsQuery = query(
         contactsRef,
@@ -175,7 +178,7 @@ const TaskBoard: React.FC = () => {
   const handleUpdateTask = async (updatedTask: Task) => {
     if (currentUser && updatedTask.id) {
       try {
-        const taskRef = doc(db, 'tasks', updatedTask.id); 
+        const taskRef = doc(db, 'tasks', updatedTask.id);
         await updateDoc(taskRef, {
           title: updatedTask.title,
           description: updatedTask.description,
@@ -185,6 +188,7 @@ const TaskBoard: React.FC = () => {
           dueDate: updatedTask.dueDate,
           subtask: updatedTask.subtask,
           status: updatedTask.status,
+          order: updatedTask.order, // Ensure order is updated
         });
         closeEditModal();
       } catch (err) {
@@ -225,16 +229,79 @@ const TaskBoard: React.FC = () => {
     if (!task) return;
 
     const newStatus = destination.droppableId;
+    const startColumn = source.droppableId;
+    const endColumn = destination.droppableId;
 
-    if (newStatus !== task.status) {
-      try {
-        const taskRef = doc(db, 'tasks', task.id); 
-        await updateDoc(taskRef, {
-          status: newStatus,
-        });
-      } catch (err) {
-        console.error('Error updating task status:', err);
-      }
+    let newTasks: Task[] = [...tasks];
+
+    if (startColumn === endColumn) {
+      const columnTasks = newTasks.filter((t) => t.status === startColumn);
+      const otherTasks = newTasks.filter((t) => t.status !== startColumn);
+      const [movedTask] = columnTasks.splice(source.index, 1);
+      columnTasks.splice(destination.index, 0, movedTask);
+
+      const updatedColumnTasks = columnTasks.map((t, index) => ({
+        ...t,
+        order: index,
+      }));
+
+      newTasks = [...otherTasks, ...updatedColumnTasks];
+    } else {
+      const startTasks = newTasks.filter((t) => t.status === startColumn);
+      const endTasks = newTasks.filter((t) => t.status === endColumn);
+      const otherTasks = newTasks.filter(
+        (t) => t.status !== startColumn && t.status !== endColumn
+      );
+
+      const [movedTask] = startTasks.splice(source.index, 1);
+      movedTask.status = newStatus;
+      endTasks.splice(destination.index, 0, movedTask);
+
+      const updatedStartTasks = startTasks.map((t, index) => ({
+        ...t,
+        order: index,
+      }));
+      const updatedEndTasks = endTasks.map((t, index) => ({
+        ...t,
+        order: index,
+      }));
+
+      newTasks = [...otherTasks, ...updatedStartTasks, ...updatedEndTasks];
+    }
+
+    setTasks(newTasks);
+
+    const batch = writeBatch(db);
+
+    if (startColumn === endColumn) {
+      const updatedTasks = newTasks.filter((t) => t.status === startColumn);
+      updatedTasks.forEach((t, index) => {
+        const taskRef = doc(db, 'tasks', t.id);
+        batch.update(taskRef, { order: index });
+      });
+    } else {
+      const updatedStartTasks = newTasks.filter(
+        (t) => t.status === startColumn
+      );
+      const updatedEndTasks = newTasks.filter((t) => t.status === endColumn);
+
+      updatedStartTasks.forEach((t, index) => {
+        const taskRef = doc(db, 'tasks', t.id);
+        batch.update(taskRef, { order: index });
+      });
+
+      updatedEndTasks.forEach((t, index) => {
+        const taskRef = doc(db, 'tasks', t.id);
+        batch.update(taskRef, { order: index, status: endColumn });
+      });
+    }
+
+    try {
+      await batch.commit();
+    } catch (err) {
+      console.error('Error moving task:', err);
+      setTasks(tasks); // Revert to the original tasks
+      alert('Failed to update task order. Please try again.');
     }
   };
 
@@ -252,6 +319,10 @@ const TaskBoard: React.FC = () => {
     } else {
       tasksByStatus['To do'].push(task);
     }
+  });
+
+  Object.keys(tasksByStatus).forEach((status) => {
+    tasksByStatus[status].sort((a, b) => a.order - b.order);
   });
 
   if (!currentUser) {
@@ -355,7 +426,6 @@ const TaskBoard: React.FC = () => {
                                   </p>
                                 )}
                               </div>
-                              {/* Priority and Buttons Section */}
                               <div className="flex justify-between items-center mt-4">
                                 <div className="flex items-center">
                                   <span
@@ -398,7 +468,6 @@ const TaskBoard: React.FC = () => {
           </section>
         </DragDropContext>
       )}
-      {/* Edit Task Modal */}
       <Modal isOpen={modalState.isOpen} onClose={closeEditModal} ariaLabel="Edit Task Modal">
         {modalState.task && (
           <EditTaskModal
