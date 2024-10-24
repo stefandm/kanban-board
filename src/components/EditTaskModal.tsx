@@ -203,7 +203,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               <textarea
                 id="edit-description"
                 required
-                className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500  resize-none"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Task Description"
@@ -228,13 +228,13 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                   isMulti
                   options={contacts.map((contact) => ({
                     value: contact.id,
-                    label: `${contact.name} (${contact.email})`,
+                    label: `${contact.name}`,
                   }))}
                   className="react-select-container"
                   classNamePrefix="react-select"
                   value={assignedTo.map((contact) => ({
                     value: contact.id,
-                    label: `${contact.name} (${contact.email})`,
+                    label: `${contact.name}`,
                   }))}
                   onChange={(selectedOptions) => {
                     setAssignedTo(
@@ -319,6 +319,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                   aria-hidden="true"
                 />
                 <input
+                  
                   id="edit-subtaskInput"
                   type="text"
                   className="w-full pl-10 pr-4 py-3 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
