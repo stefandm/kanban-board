@@ -53,7 +53,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, ariaLabel, children }) =
           >
             <FaTimes size={20} />
           </button>
-          <div className="p-6">{children}</div>
+          <div className="p-6         overflow-y-auto 
+        max-h-[95vh] ">{children}</div>
         </div>
       </div>
     </FocusTrap>,

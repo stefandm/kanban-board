@@ -342,7 +342,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                 {subtask.map((subtaskItem, index) => (
                   <li
                     key={index}
-                    className="flex items-center justify-between bg-gray-200 p-3 rounded-lg mt-2"
+                    className="flex items-center justify-center md:justify-between bg-gray-200 p-3  rounded-lg mt-2"
                   >
                     <div className="flex items-center">
                       <input

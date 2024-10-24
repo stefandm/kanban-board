@@ -74,7 +74,6 @@ const Navbar: React.FC<NavbarProps> = ({ openCreateTaskModal }) => {
                 <FaTachometerAlt className="mr-2" />
                 Dashboard
               </Link>
-              {/* Replace Link with Button to open modal */}
               <button
                 onClick={openCreateTaskModal}
                 className="flex items-center text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
@@ -150,7 +149,7 @@ const Navbar: React.FC<NavbarProps> = ({ openCreateTaskModal }) => {
                     openCreateTaskModal();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="flex items-center bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 mt-2"
+                  className="flex items-center w-full bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 mt-2"
                   aria-label="Create Task"
                 >
                   <FaPlusCircle className="mr-2" />
@@ -164,21 +163,21 @@ const Navbar: React.FC<NavbarProps> = ({ openCreateTaskModal }) => {
                   <FaAddressBook className="mr-2" />
                   Contacts
                 </Link>
-                <span className="text-white flex items-center mt-2">
-                  <FaUserCircle className="mr-2" />
-                  {currentUser.email}
-                </span>
                 <button
                   onClick={() => {
                     handleLogout();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="flex items-center bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 mt-2"
+                  className="flex items-center w-full bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 mt-2"
                   aria-label="Logout"
                 >
                   <FaSignOutAlt className="mr-2" />
                   Logout
                 </button>
+                <span className="text-white flex  items-center mt-2">
+                  <FaUserCircle className="mr-2" />
+                  {currentUser.email}
+                </span>
               </>
             ) : (
               <>

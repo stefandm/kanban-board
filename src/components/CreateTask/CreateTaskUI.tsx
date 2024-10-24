@@ -53,7 +53,7 @@ const CreateTaskUI: React.FC<CreateTaskUIProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Create Task Modal">
       <form
         onSubmit={handleCreateTask}
-        className="bg-white p-8 rounded-lg"
+        className="bg-white p-8 rounded-lg "
         aria-labelledby="create-task-heading"
       >
         <h2
