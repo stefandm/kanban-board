@@ -1,4 +1,3 @@
-// src/components/CreateTask/CreateTaskLogic.tsx
 import React, { useState, useEffect, useContext } from 'react';
 import { db } from '../../firebase';
 import {
@@ -216,7 +215,6 @@ const CreateTaskLogic: React.FC<CreateTaskLogicProps> = ({ children, onClose, is
     setCategory(newCategory);
   };
 
-  // New function to handle category removal
   const handleRemoveCategory = (categoryToRemove: string) => {
     setCategories((prev) => prev.filter((cat) => cat !== categoryToRemove));
     if (category === categoryToRemove) {
@@ -252,7 +250,7 @@ const CreateTaskLogic: React.FC<CreateTaskLogicProps> = ({ children, onClose, is
     handleRemoveSubtask,
     handleClearFields,
     handleCreateCategory,
-    handleRemoveCategory, // Add this to logicData
+    handleRemoveCategory, 
   };
 
   return <>{children(logicData)}</>;
@@ -260,7 +258,6 @@ const CreateTaskLogic: React.FC<CreateTaskLogicProps> = ({ children, onClose, is
 
 export default CreateTaskLogic;
 
-// Update the CreateTaskLogicData interface
 export interface CreateTaskLogicData {
   title: string;
   setTitle: React.Dispatch<React.SetStateAction<string>>;

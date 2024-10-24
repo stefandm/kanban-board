@@ -1,4 +1,3 @@
-// src/components/CreateTask/CreateTask.tsx
 import React from 'react';
 import CreateTaskLogic, { CreateTaskLogicData } from './CreateTaskLogic';
 import CreateTaskUI from './CreateTaskUI';
