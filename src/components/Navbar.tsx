@@ -16,7 +16,11 @@ import {
   FaTimes,
 } from 'react-icons/fa';
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  openCreateTaskModal: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ openCreateTaskModal }) => {
   const { currentUser } = useContext(AuthContext);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -58,39 +62,42 @@ const Navbar: React.FC = () => {
             <>
               <Link
                 to="/summary"
-                className="flex items-center  text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
+                className="flex items-center text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
               >
                 <FaTasks className="mr-2" />
                 Summary
               </Link>
               <Link
                 to="/dashboard"
-                className="flex items-center  text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
+                className="flex items-center text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
               >
                 <FaTachometerAlt className="mr-2" />
                 Dashboard
               </Link>
-              <Link
-                to="/create-task"
-                className="flex items-center  text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
+              {/* Replace Link with Button to open modal */}
+              <button
+                onClick={openCreateTaskModal}
+                className="flex items-center text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
+                aria-label="Create Task"
               >
                 <FaPlusCircle className="mr-2" />
                 Create Task
-              </Link>
+              </button>
               <Link
                 to="/contacts"
-                className="flex items-center  text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
+                className="flex items-center text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
               >
                 <FaAddressBook className="mr-2" />
                 Contacts
               </Link>
               <div className="text-white px-4 flex items-center">
-                <FaUserCircle className="mr-2" size={30}/>
-                {currentUser.email?.slice(0,1)}
+                <FaUserCircle className="mr-2" size={30} />
+                {currentUser.email?.slice(0, 1)}
               </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center  text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
+                className="flex items-center text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
+                aria-label="Logout"
               >
                 <FaSignOutAlt className="mr-2" />
                 Logout
@@ -138,14 +145,17 @@ const Navbar: React.FC = () => {
                   <FaTachometerAlt className="mr-2" />
                   Dashboard
                 </Link>
-                <Link
-                  to="/create-task"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                <button
+                  onClick={() => {
+                    openCreateTaskModal();
+                    setIsMobileMenuOpen(false);
+                  }}
                   className="flex items-center bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 mt-2"
+                  aria-label="Create Task"
                 >
                   <FaPlusCircle className="mr-2" />
                   Create Task
-                </Link>
+                </button>
                 <Link
                   to="/contacts"
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -164,6 +174,7 @@ const Navbar: React.FC = () => {
                     setIsMobileMenuOpen(false);
                   }}
                   className="flex items-center bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 mt-2"
+                  aria-label="Logout"
                 >
                   <FaSignOutAlt className="mr-2" />
                   Logout

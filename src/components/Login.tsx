@@ -206,71 +206,70 @@ const Login: React.FC = () => {
         </p>
       </form>
 
-      {isResetModalOpen && (
-        <Modal onClose={closeResetModal} ariaLabel="Password Reset Modal">
-          <form
-            onSubmit={handlePasswordReset}
-            className="bg-white p-8 rounded-lg"
-            aria-labelledby="reset-password-heading"
+      {/* Password Reset Modal */}
+      <Modal isOpen={isResetModalOpen} onClose={closeResetModal} ariaLabel="Password Reset Modal">
+        <form
+          onSubmit={handlePasswordReset}
+          className="bg-white p-8 rounded-lg"
+          aria-labelledby="reset-password-heading"
+        >
+          <h2
+            id="reset-password-heading"
+            className="text-3xl mb-6 text-center font-bold flex items-center justify-center"
           >
-            <h2
-              id="reset-password-heading"
-              className="text-3xl mb-6 text-center font-bold flex items-center justify-center"
-            >
-              Reset Password
-            </h2>
-            {error && (
-              <div className="mb-4 text-red-500 text-md" role="alert">
-                {error}
-              </div>
-            )}
-            {resetMessage && (
-              <div className="mb-4 text-green-500 text-md" role="status">
-                {resetMessage}
-              </div>
-            )}
-            <div className="mb-6">
-              <label
-                htmlFor="reset-email"
-                className="block text-gray-700 text-lg font-medium mb-2"
-              >
-                Email
-              </label>
-              <div className="relative">
-                <FaEnvelope
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  aria-hidden="true"
-                />
-                <input
-                  id="reset-email"
-                  type="email"
-                  required
-                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  placeholder="Email"
-                  aria-required="true"
-                />
-              </div>
+            Reset Password
+          </h2>
+          {error && (
+            <div className="mb-4 text-red-500 text-md" role="alert">
+              {error}
             </div>
-            <button
-              type="submit"
-              className="w-full bg-gray-700 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 text-lg font-semibold mb-4 hover:shadow-[1px_1px_1px_2px_#2b6cb0]"
-              aria-label="Send Password Reset Email"
+          )}
+          {resetMessage && (
+            <div className="mb-4 text-green-500 text-md" role="status">
+              {resetMessage}
+            </div>
+          )}
+          <div className="mb-6">
+            <label
+              htmlFor="reset-email"
+              className="block text-gray-700 text-lg font-medium mb-2"
             >
-              Send Reset Email
-            </button>
-            <button
-              type="button"
-              onClick={closeResetModal}
-              className="w-full border-gray-700 border-[1px] hover:text-blue-700 py-3 rounded-lg hover:border-blue-700 transition duration-200 text-lg font-semibold hover:shadow-[1px_1px_1px_2px_#2b6cb0]"
-              aria-label="Cancel Password Reset"
-            >
-              Cancel
-            </button>
-          </form>
-        </Modal>
-      )}
+              Email
+            </label>
+            <div className="relative">
+              <FaEnvelope
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                aria-hidden="true"
+              />
+              <input
+                id="reset-email"
+                type="email"
+                required
+                className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                placeholder="Email"
+                aria-required="true"
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-gray-700 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 text-lg font-semibold mb-4 hover:shadow-[1px_1px_1px_2px_#2b6cb0]"
+            aria-label="Send Password Reset Email"
+          >
+            Send Reset Email
+          </button>
+          <button
+            type="button"
+            onClick={closeResetModal}
+            className="w-full border-gray-700 border-[1px] hover:text-blue-700 py-3 rounded-lg hover:border-blue-700 transition duration-200 text-lg font-semibold hover:shadow-[1px_1px_1px_2px_#2b6cb0]"
+            aria-label="Cancel Password Reset"
+          >
+            Cancel
+          </button>
+        </form>
+      </Modal>
     </div>
   );
 };

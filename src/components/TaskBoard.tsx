@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import {
   collection,
   query,
@@ -27,6 +27,7 @@ import {
   Draggable,
   DropResult,
 } from '@hello-pangea/dnd';
+import Modal from './Modal'; // Ensure EditTaskModal uses the enhanced Modal
 
 const columnsOrder = ['To do', 'In progress', 'Awaiting Feedback', 'Completed'];
 
@@ -37,8 +38,10 @@ const TaskBoard: React.FC = () => {
   const { currentUser } = useContext(AuthContext);
 
   // State for the edit modal
-  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    task?: Task;
+  }>({ isOpen: false });
 
   useEffect(() => {
     let unsubscribeTasks: () => void;
@@ -162,13 +165,11 @@ const TaskBoard: React.FC = () => {
   };
 
   const openEditModal = (task: Task) => {
-    setSelectedTask(task);
-    setIsEditModalOpen(true);
+    setModalState({ isOpen: true, task });
   };
 
   const closeEditModal = () => {
-    setSelectedTask(null);
-    setIsEditModalOpen(false);
+    setModalState({ isOpen: false });
   };
 
   const handleUpdateTask = async (updatedTask: Task) => {
@@ -397,15 +398,18 @@ const TaskBoard: React.FC = () => {
           </section>
         </DragDropContext>
       )}
-      {isEditModalOpen && selectedTask && (
-        <EditTaskModal
-          task={selectedTask}
-          contacts={contacts}
-          categories={categories}
-          onClose={closeEditModal}
-          onUpdate={handleUpdateTask}
-        />
-      )}
+      {/* Edit Task Modal */}
+      <Modal isOpen={modalState.isOpen} onClose={closeEditModal} ariaLabel="Edit Task Modal">
+        {modalState.task && (
+          <EditTaskModal
+            task={modalState.task}
+            contacts={contacts}
+            categories={categories}
+            onClose={closeEditModal}
+            onUpdate={handleUpdateTask}
+          />
+        )}
+      </Modal>
     </main>
   );
 };

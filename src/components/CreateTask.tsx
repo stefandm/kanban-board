@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { db } from '../firebase';
 import {
   collection,
@@ -25,8 +25,14 @@ import {
 } from 'react-icons/fa';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
+import Modal from './Modal';
 
-const CreateTask: React.FC = () => {
+interface CreateTaskProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const CreateTask: React.FC<CreateTaskProps> = ({ isOpen, onClose }) => {
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [priority, setPriority] = useState<'Low' | 'Normal' | 'Urgent'>('Normal');
@@ -83,6 +89,20 @@ const CreateTask: React.FC = () => {
     fetchCategories();
   }, [currentUser]);
 
+  // Handle subtask status toggle
+  const handleSubtaskStatusChange = (index: number) => {
+    const updatedSubtasks = [...subtask];
+    updatedSubtasks[index].status = updatedSubtasks[index].status === 'done' ? 'not done' : 'done';
+    setSubtask(updatedSubtasks);
+  };
+
+  // Handle subtask description change
+  const handleSubtaskDescriptionChange = (index: number, newDescription: string) => {
+    const updatedSubtasks = [...subtask];
+    updatedSubtasks[index].description = newDescription;
+    setSubtask(updatedSubtasks);
+  };
+
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -118,6 +138,7 @@ const CreateTask: React.FC = () => {
         subtask,
         status: 'To do',
       });
+      onClose();
       navigate('/dashboard');
     } catch (err: unknown) {
       console.error('Error adding task:', err);
@@ -169,20 +190,13 @@ const CreateTask: React.FC = () => {
   };
 
   return (
-    <div
-      className="flex items-center justify-center my-10 bg-gradient-to-r p-4"
-      role="main"
-      aria-labelledby="create-task-heading"
-    >
-      <form
-        onSubmit={handleCreateTask}
-        className="bg-white p-8 rounded-lg shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] w-full max-w-4xl"
-        aria-labelledby="create-task-heading"
-      >
+    <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Create Task Modal">
+      <form onSubmit={handleCreateTask} className="bg-white p-8 rounded-lg" aria-labelledby="create-task-heading">
         <h2
           id="create-task-heading"
           className="text-3xl md:text-4xl mb-6 text-center font-bold flex items-center justify-center"
         >
+          <FaPlusCircle className="mr-3 text-blue-700 text-4xl" aria-hidden="true" />
           Create New Task
         </h2>
         {error && (
@@ -195,10 +209,7 @@ const CreateTask: React.FC = () => {
           {/* Left Column */}
           <div>
             <div className="mb-6">
-              <label
-                htmlFor="title"
-                className="block text-gray-700 text-lg font-medium mb-2"
-              >
+              <label htmlFor="title" className="block text-gray-700 text-lg font-medium mb-2">
                 Title
               </label>
               <div className="relative">
@@ -220,10 +231,7 @@ const CreateTask: React.FC = () => {
             </div>
 
             <div className="mb-6">
-              <label
-                htmlFor="description"
-                className="block text-gray-700 text-lg font-medium mb-2"
-              >
+              <label htmlFor="description" className="block text-gray-700 text-lg font-medium mb-2">
                 Description
               </label>
               <div className="relative">
@@ -245,10 +253,7 @@ const CreateTask: React.FC = () => {
             </div>
 
             <div className="mb-6">
-              <label
-                htmlFor="assignedTo"
-                className="block text-gray-700 text-lg font-medium mb-2"
-              >
+              <label htmlFor="assignedTo" className="block text-gray-700 text-lg font-medium mb-2">
                 Assigned To
               </label>
               <div className="relative">
@@ -273,9 +278,7 @@ const CreateTask: React.FC = () => {
                     onChange={(selectedOptions) => {
                       setAssignedTo(
                         selectedOptions.map((option) => {
-                          const contact = contacts.find(
-                            (c) => c.id === option.value
-                          );
+                          const contact = contacts.find((c) => c.id === option.value);
                           return contact!;
                         })
                       );
@@ -288,10 +291,7 @@ const CreateTask: React.FC = () => {
             </div>
 
             <div className="mb-6">
-              <label
-                htmlFor="category"
-                className="block text-gray-700 text-lg font-medium mb-2"
-              >
+              <label htmlFor="category" className="block text-gray-700 text-lg font-medium mb-2">
                 Category
               </label>
               <div className="relative">
@@ -327,10 +327,7 @@ const CreateTask: React.FC = () => {
           {/* Right Column */}
           <div>
             <div className="mb-6">
-              <label
-                htmlFor="dueDate"
-                className="block text-gray-700 text-lg font-medium mb-2"
-              >
+              <label htmlFor="dueDate" className="block text-gray-700 text-lg font-medium mb-2">
                 Due Date
               </label>
               <div className="relative">
@@ -366,7 +363,7 @@ const CreateTask: React.FC = () => {
                   <input
                     id="subtaskInput"
                     type="text"
-                    className="w-full pl-12 pr-4 py-3 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-4 py-3 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={subtaskInput}
                     onChange={(e) => setSubtaskInput(e.target.value)}
                     placeholder="Enter a subtask"
@@ -389,7 +386,30 @@ const CreateTask: React.FC = () => {
                       key={index}
                       className="flex items-center justify-between bg-gray-200 p-3 rounded-lg mt-2"
                     >
-                      <span>{subtaskItem.description}</span>
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          className="mr-2"
+                          checked={subtaskItem.status === 'done'}
+                          onChange={() => handleSubtaskStatusChange(index)}
+                          aria-label={`Mark subtask ${index + 1} as ${
+                            subtaskItem.status === 'done' ? 'not done' : 'done'
+                          }`}
+                        />
+                        <input
+                          type="text"
+                          className={`flex-1 bg-transparent border-none focus:outline-none ${
+                            subtaskItem.status === 'done'
+                              ? 'line-through text-gray-500'
+                              : ''
+                          }`}
+                          value={subtaskItem.description}
+                          onChange={(e) =>
+                            handleSubtaskDescriptionChange(index, e.target.value)
+                          }
+                          aria-label={`Subtask ${index + 1} Description`}
+                        />
+                      </div>
                       <button
                         type="button"
                         onClick={() => handleRemoveSubtask(index)}
@@ -405,10 +425,7 @@ const CreateTask: React.FC = () => {
             </div>
 
             <div className="mb-6">
-              <label
-                htmlFor="priority"
-                className="block text-gray-700 text-lg font-medium mb-2"
-              >
+              <label htmlFor="priority" className="block text-gray-700 text-lg font-medium mb-2">
                 Priority
               </label>
               <div className="relative">
@@ -438,7 +455,10 @@ const CreateTask: React.FC = () => {
         <div className="flex justify-between mt-6">
           <button
             type="button"
-            onClick={handleClearFields}
+            onClick={() => {
+              handleClearFields();
+              onClose();
+            }}
             className="w-full lg:w-1/2 py-3 rounded-lg hover:text-blue-800 hover:bg-blue-100 transition-colors duration-200 text-lg font-semibold mr-2 flex items-center justify-center shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px]"
             aria-label="Clear All Fields"
           >
@@ -455,7 +475,7 @@ const CreateTask: React.FC = () => {
           </button>
         </div>
       </form>
-    </div>
+    </Modal>
   );
 };
 

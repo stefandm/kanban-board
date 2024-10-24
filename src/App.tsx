@@ -1,5 +1,4 @@
-// src/App.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Signup from './components/Signup';
 import Login from './components/Login';
@@ -12,10 +11,21 @@ import { AuthProvider } from './contexts/AuthContext';
 import Summary from './components/Summary';
 
 const App: React.FC = () => {
+  const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState<boolean>(false);
+
+  const openCreateTaskModal = () => {
+    setIsCreateTaskModalOpen(true);
+  };
+
+  const closeCreateTaskModal = () => {
+    setIsCreateTaskModalOpen(false);
+  };
+
   return (
     <AuthProvider>
-      <Router> {/* Set basename if needed */}
-        <Navbar />
+      <Router>
+        <Navbar openCreateTaskModal={openCreateTaskModal} />
+
         <Routes>
           <Route
             path="/dashboard"
@@ -34,14 +44,6 @@ const App: React.FC = () => {
             }
           />
           <Route
-            path="/create-task"
-            element={
-              <ProtectedRoute>
-                <CreateTask />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/contacts"
             element={
               <ProtectedRoute>
@@ -53,6 +55,9 @@ const App: React.FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<Login />} /> {/* Default route */}
         </Routes>
+
+        {/* Render the CreateTask modal */}
+        <CreateTask isOpen={isCreateTaskModalOpen} onClose={closeCreateTaskModal} />
       </Router>
     </AuthProvider>
   );
