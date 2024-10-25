@@ -188,7 +188,7 @@ const TaskBoard: React.FC = () => {
           dueDate: updatedTask.dueDate,
           subtask: updatedTask.subtask,
           status: updatedTask.status,
-          order: updatedTask.order, // Ensure order is updated
+          order: updatedTask.order, 
         });
         closeEditModal();
       } catch (err) {
@@ -401,13 +401,13 @@ const TaskBoard: React.FC = () => {
                                 </h3>
                                 <p
                                   id={`task-description-${task.id}`}
-                                  className="text-gray-700 mb-2"
+                                  className="text-gray-700 mb-2 hidden sm:block"
                                 >
                                   {task.description.length > 50
                                     ? task.description.slice(0, 47) + '...'
                                     : task.description}
                                 </p>
-                                <div className="flex items-center mb-2">
+                                <div className="sm:flex items-center mb-2 hidden">
                                   {task.assignedTo.map((id) => (
                                     <div
                                       key={id}
@@ -426,7 +426,7 @@ const TaskBoard: React.FC = () => {
                                   </p>
                                 )}
                               </div>
-                              <div className="flex justify-between items-center mt-4">
+                              <div className="flex justify-between items-center sm:mt-4">
                                 <div className="flex items-center">
                                   <span
                                     className={`${getPriorityColor(task.priority)} mr-2`}
@@ -444,14 +444,14 @@ const TaskBoard: React.FC = () => {
                                     className="text-blue-500 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
                                     aria-label={`Edit task ${task.title}`}
                                   >
-                                    <FaEdit size={20} aria-hidden="true" />
+                                    <FaEdit size={30} aria-hidden="true" className='md:scale-125'/>
                                   </button>
                                   <button
                                     onClick={() => handleDeleteTask(task.id)}
                                     className="text-red-700 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 rounded"
                                     aria-label={`Delete task ${task.title}`}
                                   >
-                                    <FaTrashAlt size={20} aria-hidden="true" />
+                                    <FaTrashAlt size={25} aria-hidden="true" className='md:scale-125'/>
                                   </button>
                                 </div>
                               </div>

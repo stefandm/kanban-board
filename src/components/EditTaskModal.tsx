@@ -343,12 +343,12 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                 {subtask.map((subtaskItem, index) => (
                   <li
                     key={index}
-                    className="flex items-center justify-center md:justify-between bg-gray-200 p-3  rounded-lg mt-2"
+                    className="flex items-center justify-center md:justify-between bg-gray-200 p-3  rounded-lg mt-2 w-fit md:w-auto"
                   >
                     <div className="flex items-center">
                       <input
                         type="checkbox"
-                        className="mr-2"
+                        className=" mr-2"
                         checked={subtaskItem.status === 'done'}
                         onChange={() => handleSubtaskStatusChange(index)}
                         aria-label={`Mark subtask ${index + 1} as ${
@@ -357,7 +357,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                       />
                       <input
                         type="text"
-                        className={`flex-1 bg-transparent border-none focus:outline-none ${
+                        className={`flex-1 bg-transparent border-none focus:outline-none  ${
                           subtaskItem.status === 'done'
                             ? 'line-through text-gray-500'
                             : ''

@@ -360,10 +360,10 @@ const CreateTaskUI: React.FC<CreateTaskUIProps> = ({
           </button>
           <button
             type="submit"
-            className="w-full lg:w-1/2 shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] py-3 rounded-lg bg-gray-500 hover:bg-green-700 text-white transition-colors duration-200 text-lg font-semibold ml-2 flex items-center justify-center"
+            className=" w-full lg:w-1/2 shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] py-3 rounded-lg bg-gray-500 hover:bg-green-700 text-white transition-colors duration-200 text-lg font-semibold ml-2 flex items-center justify-center"
             aria-label="Create Task"
           >
-            <FaPlusCircle className="mr-2" aria-hidden="true" />
+            <FaPlusCircle className="ml-2 md:mr-2" aria-hidden="true" />
             Create Task
           </button>
         </div>
