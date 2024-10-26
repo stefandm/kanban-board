@@ -223,6 +223,10 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                 aria-hidden="true"
               />
               <div className="pl-12">
+              <div
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >                
                 <Select
                   id="edit-assignedTo"
                   isMulti
@@ -248,6 +252,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                   aria-label="Select Contacts to Assign"
                 />
               </div>
+              </div>
             </div>
           </div>
 
@@ -261,6 +266,10 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                 aria-hidden="true"
               />
               <div className="pl-12">
+              <div
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                >          
                 <CreatableSelect
                   id="edit-category"
                   isClearable
@@ -280,6 +289,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                   placeholder="Enter or select a category"
                   aria-label="Select or Create Category"
                 />
+                </div>                
               </div>
             </div>
           </div>

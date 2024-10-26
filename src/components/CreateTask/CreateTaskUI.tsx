@@ -142,6 +142,10 @@ const CreateTaskUI: React.FC<CreateTaskUIProps> = ({
                   aria-hidden="true"
                 />
                 <div className="pl-12">
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  >
                   <Select
                     id="assignedTo"
                     isMulti
@@ -168,6 +172,7 @@ const CreateTaskUI: React.FC<CreateTaskUIProps> = ({
                     placeholder="Select Contacts"
                     aria-label="Select Contacts to Assign"
                   />
+                  </div>
                 </div>
               </div>
             </div>
@@ -185,6 +190,10 @@ const CreateTaskUI: React.FC<CreateTaskUIProps> = ({
                   aria-hidden="true"
                 />
                 <div className="pl-12">
+                <div
+                    onClick={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
                   <CreatableSelect
                     id="category"
                     isClearable
@@ -206,6 +215,7 @@ const CreateTaskUI: React.FC<CreateTaskUIProps> = ({
                     placeholder="Enter or select a category"
                     aria-label="Select or Create Category"
                   />
+                  </div>
                 </div>
               </div>
             </div>
