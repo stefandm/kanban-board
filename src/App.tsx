@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Signup from './components/Signup';
 import Login from './components/Login';
-import TaskBoard from './components/TaskBoard';
+import TaskBoard from './components/TaskBoard/TaskBoard';
 import Navbar from './components/Navbar';
 import CreateTask from './components/CreateTask/CreateTask';
 import Contacts from './components/Contacts/Contacts';
