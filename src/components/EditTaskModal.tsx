@@ -214,47 +214,63 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
           </div>
 
           <div className="mb-6">
-            <label htmlFor="edit-assignedTo" className="block text-gray-700 text-lg font-medium mb-2">
-              Assigned To
-            </label>
-            <div className="relative">
-              <FaUser
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                aria-hidden="true"
-              />
-              <div className="pl-12">
-              <div
-                  onClick={(e) => e.stopPropagation()}
-                  onMouseDown={(e) => e.stopPropagation()}
-                >                
-                <Select
-                  id="edit-assignedTo"
-                  isMulti
-                  options={contacts.map((contact) => ({
-                    value: contact.id,
-                    label: `${contact.name}`,
-                  }))}
-                  className="react-select-container"
-                  classNamePrefix="react-select"
-                  value={assignedTo.map((contact) => ({
-                    value: contact.id,
-                    label: `${contact.name}`,
-                  }))}
-                  onChange={(selectedOptions) => {
-                    setAssignedTo(
-                      selectedOptions.map((option) => {
-                        const contact = contacts.find((c) => c.id === option.value);
-                        return contact!;
-                      })
-                    );
-                  }}
-                  placeholder="Select Contacts"
-                  aria-label="Select Contacts to Assign"
-                />
+                <label htmlFor="edit-assignedTo" className="block text-gray-700 text-lg font-medium mb-2">
+                  Assigned To
+                </label>
+                <div className="relative">
+                  <FaUser
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    aria-hidden="true"
+                  />
+                  <div className="pl-12">
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+                    >
+                      <Select
+                        id="edit-assignedTo"
+                        isMulti
+                        options={contacts.map((contact) => ({
+                          value: contact.id,
+                          label: `${contact.name}`,
+                        }))}
+                        className="react-select-container"
+                        classNamePrefix="react-select"
+                        value={assignedTo.map((contact) => ({
+                          value: contact.id,
+                          label: `${contact.name}`,
+                        }))}
+                        onChange={(selectedOptions) => {
+                          setAssignedTo(
+                            selectedOptions.map((option) => {
+                              const contact = contacts.find((c) => c.id === option.value);
+                              return contact!;
+                            })
+                          );
+                        }}
+                        placeholder="Select Contacts"
+                        aria-label="Select Contacts to Assign"
+                        styles={{
+                          valueContainer: (provided) => ({
+                            ...provided,
+                            maxHeight: '10vh', 
+                            overflowY: 'auto',  
+                            paddingRight: '8px', 
+                          }),
+                          control: (provided) => ({
+                            ...provided,
+                            minHeight: 'auto',
+                          }),
+                          multiValue: (provided) => ({
+                            ...provided,
+                            maxWidth: '100%', 
+                          }),
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-              </div>
-            </div>
-          </div>
 
           <div className="mb-6">
             <label htmlFor="edit-category" className="block text-gray-700 text-lg font-medium mb-2">
