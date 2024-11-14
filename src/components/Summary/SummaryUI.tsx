@@ -95,7 +95,7 @@ const SummaryUI: React.FC<SummaryUIProps> = ({
             >
               <FaEdit
                 size={50}
-                className="text-5xl mb-4 text-blue-600"
+                className="text-5xl mb-4 text-blue-500"
                 aria-hidden="true"
               />
               <p className="text-xl font-medium">To Do</p>

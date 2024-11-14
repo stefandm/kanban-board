@@ -14,6 +14,7 @@ import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 import Modal from '../Modal';
 import { CreateTaskLogicData } from './CreateTaskLogic';
+import { MdAddToPhotos } from 'react-icons/md';
 
 interface CreateTaskUIProps extends CreateTaskLogicData {
   isOpen: boolean;
@@ -60,7 +61,7 @@ const CreateTaskUI: React.FC<CreateTaskUIProps> = ({
           id="create-task-heading"
           className="text-3xl md:text-4xl mb-6 text-center font-bold flex items-center justify-center"
         >
-          <FaPlusCircle
+          <MdAddToPhotos
             className="mr-3 text-blue-700 text-4xl"
             aria-hidden="true"
           />

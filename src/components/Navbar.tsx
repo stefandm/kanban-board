@@ -4,9 +4,6 @@ import { AuthContext } from '../contexts/AuthContext';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import {
-  FaTasks,
-  FaTachometerAlt,
-  FaPlusCircle,
   FaAddressBook,
   FaSignOutAlt,
   FaUserCircle,
@@ -15,6 +12,8 @@ import {
   FaBars,
   FaTimes,
 } from 'react-icons/fa';
+import { GrTasks } from 'react-icons/gr';
+import { MdAddToPhotos, MdOutlineSpaceDashboard, MdSummarize } from 'react-icons/md';
 
 interface NavbarProps {
   openCreateTaskModal: () => void;
@@ -39,7 +38,7 @@ const Navbar: React.FC<NavbarProps> = ({ openCreateTaskModal }) => {
           to="/summary"
           className="text-white text-2xl md:text-3xl font-bold flex items-center"
         >
-          <FaTasks className="mr-2" /> Kanban
+          <GrTasks  className="mr-2" /> Kanban
         </Link>
 
         <div className="md:hidden">
@@ -64,22 +63,22 @@ const Navbar: React.FC<NavbarProps> = ({ openCreateTaskModal }) => {
                 to="/summary"
                 className="flex items-center text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
               >
-                <FaTasks className="mr-2" />
+                <MdSummarize  className="mr-2" />
                 Summary
               </Link>
               <Link
                 to="/dashboard"
                 className="flex items-center text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
               >
-                <FaTachometerAlt className="mr-2" />
-                Dashboard
+                <MdOutlineSpaceDashboard  className="mr-2" />
+                Overview
               </Link>
               <button
                 onClick={openCreateTaskModal}
                 className="flex items-center text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
                 aria-label="Create Task"
               >
-                <FaPlusCircle className="mr-2" />
+                <MdAddToPhotos  className="mr-2" />
                 Create Task
               </button>
               <Link
@@ -133,7 +132,7 @@ const Navbar: React.FC<NavbarProps> = ({ openCreateTaskModal }) => {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
                 >
-                  <FaTasks className="mr-2" />
+                  <MdSummarize  className="mr-2" />
                   Summary
                 </Link>
                 <Link
@@ -141,7 +140,7 @@ const Navbar: React.FC<NavbarProps> = ({ openCreateTaskModal }) => {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 mt-2"
                 >
-                  <FaTachometerAlt className="mr-2" />
+                  <MdOutlineSpaceDashboard  className="mr-2" />
                   Dashboard
                 </Link>
                 <button
@@ -152,7 +151,7 @@ const Navbar: React.FC<NavbarProps> = ({ openCreateTaskModal }) => {
                   className="flex items-center w-full bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 mt-2"
                   aria-label="Create Task"
                 >
-                  <FaPlusCircle className="mr-2" />
+                  <MdAddToPhotos  className="mr-2" />
                   Create Task
                 </button>
                 <Link
